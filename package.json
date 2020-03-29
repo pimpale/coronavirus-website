@@ -1,21 +1,21 @@
 {
-  "name": "messaging",
+  "name": "coronavirus-check",
   "version": "1.0.0",
-  "description": "messaging",
+  "description": "coronavirus-check",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pimpale/messaging.git"
+    "url": "git+https://github.com/pimpale/coronavirus-check.git"
   },
   "author": "",
   "license": "UNLICENSED",
   "bugs": {
-    "url": "https://github.com/pimpale/messaging/issues"
+    "url": "https://github.com/pimpale/coronavirus-check/issues"
   },
-  "homepage": "https://github.com/pimpale/messaging#readme",
+  "homepage": "https://github.com/pimpale/coronavirus-check#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1"
