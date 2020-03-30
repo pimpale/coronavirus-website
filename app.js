@@ -5,42 +5,52 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 8080;
 
-let msglist = [];
+let mapdata = {};
 
 // serve static files
 app.use(express.static('public'));
 
 // configure to use body parser
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-let idCounter = 0;
 
-app.get('/api/new-message/', function(req, res) {
-  let username = req.query.username;
-  let message = req.query.message;
+app.get('/api/uploadlocation/', function (req, res) {
+  let latitude = req.query.lat;
+  let longitude = req.query.lng;
+  let temporal = req.query.tmprl;
 
-  if(username != null && message != null) {
-    let msg = {
-      id: idCounter,
-      date: Date.now(),
-      username: username,
-      message: message,
-    };
-    msglist.push(msg);
-    idCounter++;
+  let chunk = {
+    chunk_lat: Math.round(latitude * 10),
+    chunk_lng: Math.round(longitude * 10),
+    chunk_tmprl: Math.round(temporal * 10),
   }
+
+  let loc = {
+    lat: latitude,
+    lng: longitude,
+    tmprl: temporal
+  };
+
+  if (chunk in mapdata) {
+    mapdata[chunk].push(loc);
+  } else {
+    mapdata[chunk] = [loc];
+  }
+
   res.end()
 });
 
-app.get('/api/get-message/', function(req, res) {
-  // get dates in milliseconds
-  let mindate = req.query.min == null ? new Date(0) : new Date(parseInt(req.query.min, 10));
-  let maxdate = req.query.max == null ? new Date() : new Date(parseInt(req.query.max, 10));
-  // filter by dates
-  res.send(msglist.filter(msg => msg.date >= mindate && msg.date <= maxdate));
+app.get('/api/downloadchunk/', function (req, res) {
 
-  res.end();
+  let chunk = {
+    chunk_lat: req.query.chunk_lat,
+    chunk_lng: req.query.chunk_lng,
+    chunk_tmprl: req.query.chunk_tmprl,
+  }
+
+  res.send(mapdata[chunk]);
+  res.end()
 });
 
 app.listen(port, () => console.log(`App listening on port ${port}!`));

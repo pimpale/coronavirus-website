@@ -1,4 +1,4 @@
-/* global L fetchJSON */
+/* global L fetchJson apiUrl */
 
 $(function () {
   $('input[name="daterange"]').daterangepicker({
@@ -32,26 +32,34 @@ $(function () {
   });
 });
 
-const SCALAR_E7 = 0.0000001;
+const SCALAR_E7 = 10e-7;
 
 async function process(file) {
-  let chunkrequestlist = [];
+  let activechunks = new Set();
+
   let pts = JSON.parse(await file.text()).locations.map(loc => {
-    const l =  {
-      lat: loc.latitudeE7 * SCALAR_E7,
-      lng: loc.longitudeE7 * SCALAR_E7,
-      tmprl: loc.timestampMS / (1000 * 60 * 60 * (100))
-    };
+    let latitude = loc.latitudeE7 * SCALAR_E7;
+    let longitude = loc.longitudeE7 * SCALAR_E7;
+    let temporal = loc.timestampMs / (1000 * 60 * 60);
+
     // Each chunk is a square 10th of a degree
-    chunkrequestlist.push({
-      lat: Math.round(l.lat*10)/10,
-      lng: Math.round(l.lng*10)/10,
-      tmprl: Math.round(l.tmprl*10)/10,
+    // SCALAR_E1
+    activechunks.add({
+      lat: Math.round(latitude * 10),
+      lng: Math.round(longitude * 10),
+      tmprl: Math.round(temporal.tmprl * 10),
     });
-    return l;
+
+    return {
+      lat: latitude,
+      lng: longitude,
+      tmprl: temporal,
+    };
   });
 
-  let chunks = chunkrequestlist.map(chr => await fetchJSON(chr));
+  let chunks = activechunks.values().map(chr => 
+    fetchJson(`${apiUrl()}/downloadchunk/?chunk_lat=${chr.lat}&chunk_lng=${chr.lng}&chunk_tmprl=${chr.tmprl}`)
+  );
 }
 
 
