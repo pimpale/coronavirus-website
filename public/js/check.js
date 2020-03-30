@@ -1,5 +1,13 @@
 /* global L */
 
+$(function() {
+  $('input[name="daterange"]').daterangepicker({
+    opens: 'left'
+  }, function(start, end, label) {
+    console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+  });
+});
+
 async function loadmap() {
   let leafletmap = L.map('mapid');
   leafletmap.setView([0, 0], 2);
@@ -15,7 +23,14 @@ async function loadmap() {
 }
 
 
-
+$(function() {
+  $('input[name="daterange"]').daterangepicker({
+    opens: 'left'
+  }, function(start, end, label) {
+    console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+  });
+});
 
 $(document).ready(async function () {
+  await loadmap();
 });

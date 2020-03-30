@@ -10,6 +10,8 @@
   <!-- CSS References -->
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="vendor/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="vendor/daterangepicker/daterangepicker.css">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/homepage.css">
 
@@ -19,11 +21,10 @@
   <script src="vendor/popper/js/popper.min.js"></script>
   <script src="vendor/bootbox/js/bootbox.js"></script>
   <script src="vendor/moment/moment.min.js"></script>
+  <script src="vendor/daterangepicker/daterangepicker.js"></script>
+  <script src="vendor/leaflet/leaflet.js"></script>
   <script src="js/common.js"></script>
-  <script src="js/signedin.js"></script>
-  <script src="js/loadprefs.js"></script>
-  <script src="js/sidebar.js"></script>
-  <script src="js/overview.js"></script>
+  <script src="js/check.js"></script>
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Exo&display=swap" rel="stylesheet">
@@ -52,19 +53,32 @@
     </nav>
   </header>
 
-
-
   <!-- Sidebar -->
   <nav id="sidebar" class="text-light bg-dark sidebar-fixed">
-    <div id="sidebar-navigation">
-      <a class="sidebar-item text-light bg-dark active" href="#" id="my-overview"><i class="fa fa-tachometer-alt"></i>
-        Overview</a>
-      <a class="sidebar-item text-light bg-dark" href="reports.html" id="my-reports"><i class="fa fa-chart-bar"></i>
-        Reports</a>
-    </div>
-    <div class="sidebar-bottom">
-      <a class="sidebar-item text-light bg-dark" href="settings.html"><i class="fa fa-cog"></i> Settings</a>
-      <a class="sidebar-item text-light bg-dark" href="index.html"><i class="fa fa-sign-out-alt"></i> Sign out</a>
+    <div class="mx-3 my-5 py-5">
+      <div class="card bg-dark">
+        <div class="card-body">
+          <h5 class="card-title text-light">Instructions</h5>
+          <p class="card-text">Visit <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> to
+            download your location history. To do this, click the "Select None" button, and then reselect "Location
+            History". Make sure to export the data as a json file. Google will then send you a link to download your
+            data. Unzip this file and upload <code>Location History.json</code>.</p>
+          <form>
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="customFile">
+              <label class="custom-file-label" for="customFile">Choose file</label>
+            </div>
+          </form>
+
+          <script>
+            // Add the following code if you want the name of the file appear on select
+            $(".custom-file-input").on("change", function () {
+              var fileName = $(this).val().split("\\").pop();
+              $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+            });
+          </script>
+        </div>
+      </div>
     </div>
   </nav>
 
@@ -82,14 +96,16 @@
               <h5 class="card-title text-center">Map</h5>
             </div>
             <p class="card-text">Once you upload the data, you should see potential interactions.</p>
-            <div class="input-group mb-3">
-              <div class="input-group-prepend">
-                <span class="input-group-text">
-                  Location
-                </span>
+
+            <form>
+              <div class="input-group mb-3 col-sm-4">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Select Date Range</span>
+                </div>
+                <input type="text" name="daterange" class="form-control form-control-lg input" value="01/01/2018 - 01/15/2018">
               </div>
-              <select id="timeslider"></select>
-            </div>
+            </form>
+            <div id="mapid" style="height:50vh;"></div>
           </div>
         </div>
       </div>
@@ -98,4 +114,3 @@
 </body>
 
 </html>
-
