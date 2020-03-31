@@ -9,6 +9,7 @@ $(function () {
 });
 
 function loadmap() {
+
   let leafletmap = L.map('mapid');
   leafletmap.setView([0, 0], 2);
 
@@ -24,19 +25,45 @@ function loadmap() {
 
   let drawnItems = new L.FeatureGroup();
 
+  leafletmap.addLayer(maplayer)
+    .addLayer(drawnItems);
+
   let drawControl = new L.Control.Draw({
+    position: 'topright',
     draw: {
+      featureGroup: drawnItems,
       polyline: false,
       polygon: false,
       circle: false,
       marker: false,
+      rectangle: true,
       circlemarker: false
+    },
+    edit: {
+      featureGroup: drawnItems,
     }
   });
 
-  leafletmap.addLayer(maplayer)
-            .addLayer(drawnItems)
-            .addControl(drawControl);
+  leafletmap.addControl(drawControl);
+
+  // add rectangle once created
+  leafletmap.on(L.Draw.Event.CREATED, function (e) {
+    let type = e.layerType;
+    leafletmap.addLayer(e.layer);
+  });
+
+  leafletmap.on(L.Draw.Event.EDITED, function (event) {
+
+    var layers = event.layers,
+      content = null;
+    layers.eachLayer(function (layer) {
+      content = getPopupContent(layer);
+      if (content !== null) {
+        layer.setPopupContent(content);
+      }
+    });
+  });
+  // */
 }
 
 
