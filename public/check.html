@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="vendor/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="vendor/daterangepicker/daterangepicker.css">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="vendor/leaflet-draw/leaflet.draw.css">
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/homepage.css">
 
@@ -23,6 +24,7 @@
   <script src="vendor/moment/moment.min.js"></script>
   <script src="vendor/daterangepicker/daterangepicker.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/leaflet-draw/leaflet.draw.js"></script>
   <script src="js/common.js"></script>
   <script src="js/check.js"></script>
 
@@ -56,6 +58,7 @@
   <!-- Sidebar -->
   <nav id="sidebar" class="text-light bg-dark sidebar-fixed">
     <div class="mx-3 my-5 py-5">
+      <!-- Instructions -->
       <div class="card bg-dark">
         <div class="card-body">
           <h5 class="card-title text-light">Instructions</h5>
@@ -77,6 +80,14 @@
               $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
             });
           </script>
+        </div>
+      </div>
+      <!-- Upload -->
+      <div class="card bg-dark my-3">
+        <div class="card-body">
+          <h5 class="card-title text-light">Upload</h5>
+          <p class="card-text">If you have coronavirus, then please consider uploading your location data to help others determine if they have been exposed.</p>
+          <a class="btn my-1">Upload</a>
         </div>
       </div>
     </div>

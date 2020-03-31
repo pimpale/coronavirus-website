@@ -16,9 +16,7 @@ app.use(bodyParser.json());
 
 
 app.get('/api/uploadlocation/', function (req, res) {
-  let latitude = req.query.lat;
-  let longitude = req.query.lng;
-  let temporal = req.query.tmprl;
+
 
   let chunk = {
     chunk_lat: Math.round(latitude * 10),
