@@ -10,10 +10,20 @@ $(function () {
 
 function loadmap() {
 
-  let leafletmap = L.map('mapid');
-  leafletmap.setView([0, 0], 2);
 
-  let maplayer = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+  /*
+  let osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  let osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  let osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib});
+  let map = new L.Map('mapid', {center: new L.LatLng(51.505, -0.04), zoom: 13});
+  let drawnItems = L.featureGroup().addTo(map);
+  */
+
+
+  let map = L.map('mapid');
+  map.setView([0, 0], 2);
+
+  let osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 18,
     minZoom: 2,
@@ -23,13 +33,18 @@ function loadmap() {
     accessToken: 'pk.eyJ1IjoicGltcGFsZSIsImEiOiJjazhkbzk4NTIwdHkzM21vMWFiNHIzZ3BiIn0.nLv4P71SFh4TIANuwJ8I9A'
   });
 
-  let drawnItems = new L.FeatureGroup();
+  osm.addTo(map);
 
-  leafletmap.addLayer(maplayer)
-    .addLayer(drawnItems);
+  let drawnItems = L.featureGroup().addTo(map);
 
-  let drawControl = new L.Control.Draw({
+  map.addControl(new L.Control.Draw({
     position: 'topright',
+    edit: {
+      featureGroup: drawnItems,
+      poly: {
+        allowIntersection: false
+      }
+    },
     draw: {
       featureGroup: drawnItems,
       polyline: false,
@@ -38,32 +53,14 @@ function loadmap() {
       marker: false,
       rectangle: true,
       circlemarker: false
-    },
-    edit: {
-      featureGroup: drawnItems,
     }
+  }));
+
+  map.on(L.Draw.Event.CREATED, function (event) {
+    let layer = event.layer;
+
+    drawnItems.addLayer(layer);
   });
-
-  leafletmap.addControl(drawControl);
-
-  // add rectangle once created
-  leafletmap.on(L.Draw.Event.CREATED, function (e) {
-    let type = e.layerType;
-    leafletmap.addLayer(e.layer);
-  });
-
-  leafletmap.on(L.Draw.Event.EDITED, function (event) {
-
-    var layers = event.layers,
-      content = null;
-    layers.eachLayer(function (layer) {
-      content = getPopupContent(layer);
-      if (content !== null) {
-        layer.setPopupContent(content);
-      }
-    });
-  });
-  // */
 }
 
 
