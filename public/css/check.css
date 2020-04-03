@@ -1,0 +1,12 @@
+::selection {
+  background: #ffc127ff;
+}
+::-moz-selection {
+  background: #ffc127ff;
+}
+
+body {
+  font-family: 'Ubuntu', sans-serif;
+  max-width: 100%;
+  overflow-x: hidden;
+}

@@ -7,14 +7,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Exo&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+
+
   <!-- CSS References -->
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="vendor/fontawesome-free/css/all.min.css">
   <link rel="stylesheet" href="vendor/daterangepicker/daterangepicker.css">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="vendor/leaflet-draw/leaflet.draw.css">
+  <link rel="stylesheet" href="css/check.css">
   <link rel="stylesheet" href="css/sidebar.css">
-  <link rel="stylesheet" href="css/homepage.css">
 
   <!-- JS References -->
   <script src="vendor/jquery/jquery.min.js"></script>
@@ -27,10 +32,6 @@
   <script src="vendor/leaflet-draw/leaflet.draw.js"></script>
   <script src="js/common.js"></script>
   <script src="js/check.js"></script>
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Exo&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
 
   <!-- Favicon -->
   <link rel='icon' href='img/icon.png' type='image/png' />
@@ -86,6 +87,8 @@
       <div class="card bg-dark my-3">
         <div class="card-body">
           <h5 class="card-title text-light">Upload</h5>
+
+
           <p class="card-text">If you have coronavirus, then please consider uploading your location data to help others determine if they have been exposed.</p>
           <a class="btn my-1">Upload</a>
         </div>
@@ -101,7 +104,7 @@
       <div id="alert-zone"></div>
       <div class="card-deck">
         <!-- Current Settings & Values -->
-        <div class="card col-sm-12 palette-level-two">
+        <div class="card col-sm-10 palette-level-two">
           <div class="card-body">
             <div class="input-group">
               <h5 class="card-title text-center">Map</h5>
@@ -109,13 +112,24 @@
             <p class="card-text">Once you upload the data, you should see potential interactions.</p>
 
             <form>
-              <div class="input-group mb-3 col-sm-4">
+              <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text">Select Date Range</span>
                 </div>
                 <input type="text" name="daterange" class="form-control form-control-lg input" value="01/01/2018 - 01/15/2018">
               </div>
             </form>
+
+
+            <form>
+              <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Select Date Range</span>
+                </div>
+                <input type="text" name="yeet" class="form-control form-control-lg input" value="01/01/2018 - 01/15/2018">
+              </div>
+            </form>
+
             <div id="mapid" style="height:50vh;"></div>
           </div>
         </div>

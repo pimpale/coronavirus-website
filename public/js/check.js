@@ -9,22 +9,13 @@ $(function () {
 });
 
 function loadmap() {
-
-
-  /*
-  let osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  let osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-  let osm = L.tileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib});
-  let map = new L.Map('mapid', {center: new L.LatLng(51.505, -0.04), zoom: 13});
-  let drawnItems = L.featureGroup().addTo(map);
-  */
-
-
   let map = L.map('mapid');
   map.setView([0, 0], 2);
 
   let osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    attribution:('Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, '
+               + '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, '
+               + 'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'),
     maxZoom: 18,
     minZoom: 2,
     id: 'mapbox/streets-v11',
