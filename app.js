@@ -1,23 +1,17 @@
+'use strict'
 // Imports
+const fs = require('fs');
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongodb = require('mongodb');
+const assert = require('assert');
 
-const app = express();
-const port = 8080;
-
-let mapdata = {};
-
-// serve static files
-app.use(express.static('public'));
-
-// configure to use body parser
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+let client;
+let db;
+let app;
 
 
-app.get('/api/uploadlocation/', function (req, res) {
-
-
+function uploadLocation(req, res) {
   let chunk = {
     chunk_lat: Math.round(latitude * 10),
     chunk_lng: Math.round(longitude * 10),
@@ -37,18 +31,40 @@ app.get('/api/uploadlocation/', function (req, res) {
   }
 
   res.end()
-});
+}
 
-app.get('/api/downloadchunk/', function (req, res) {
-
+function downloadChunk(req, res) {
   let chunk = {
     chunk_lat: req.query.chunk_lat,
     chunk_lng: req.query.chunk_lng,
     chunk_tmprl: req.query.chunk_tmprl,
   }
+  console.log('got here!:', chunk);
 
   res.send(mapdata[chunk]);
   res.end()
-});
+}
 
-app.listen(port, () => console.log(`App listening on port ${port}!`));
+async function initialize() {
+  client = await mongodb.MongoClient.connect(`mongodb://localhost:27017`);
+  db = client.db('test');
+  app = express();
+  // configure to use body parser
+  app.use(bodyParser.urlencoded({extended: false}));
+  app.use(bodyParser.json());
+  // Add methods
+  app.get('/api/uploadlocation/', uploadLocation);
+  app.get('/api/downloadchunk/', downloadChunk);
+
+  // serve static files
+  app.use(express.static('public'));
+}
+
+async function main() {
+  await initialize();
+  app.listen(8080, () => console.log(`App started successfully!`));
+  // Once we're done save files
+  client.close();
+}
+
+main();

@@ -8,8 +8,10 @@ $(function () {
   });
 });
 
+let map = null;
+
 function loadmap() {
-  let map = L.map('mapid');
+  map = L.map('mapid');
   map.setView([0, 0], 2);
 
   let osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -47,6 +49,7 @@ function loadmap() {
     }
   }));
 
+
   map.on(L.Draw.Event.CREATED, function (event) {
     let layer = event.layer;
 
@@ -64,15 +67,22 @@ $(function () {
   });
 });
 
-const SCALAR_E7 = 10e-7;
+const SCALAR_E7 = 10e-8;
 
 async function process(file) {
   let chunkrequesturls = new Set();
 
+  var counter = 0;
   let pts = JSON.parse(await file.text()).locations.map(loc => {
     let latitude = loc.latitudeE7 * SCALAR_E7;
     let longitude = loc.longitudeE7 * SCALAR_E7;
     let temporal = loc.timestampMs / (1000 * 60 * 60 * 24);
+
+    counter++;
+
+    if(counter % 1000 == 0) {
+      let marker = L.marker([latitude, longitude]).addTo(map);
+    }
 
     // Each chunk is a square 10th of a degree
     // SCALAR_E1
@@ -89,8 +99,6 @@ async function process(file) {
       tmprl: temporal,
     };
   });
-
-  console.log(chunkrequesturls);
 
   let chunks = [];
   chunkrequesturls.forEach(chr => chunks.push(fetchJson(chr)));
