@@ -11,7 +11,14 @@ let db;
 let app;
 
 
-function uploadLocation(req, res) {
+function uploadLocations(req, res) {
+
+  for const loc of req.body  {
+    if(typeof loc
+  }
+
+
+
   let chunk = {
     chunk_lat: Math.round(latitude * 10),
     chunk_lng: Math.round(longitude * 10),
@@ -53,7 +60,7 @@ async function initialize() {
   app.use(bodyParser.urlencoded({extended: false}));
   app.use(bodyParser.json());
   // Add methods
-  app.get('/api/uploadlocation/', uploadLocation);
+  app.post('/api/uploadlocations/', uploadLocations);
   app.get('/api/downloadchunk/', downloadChunk);
 
   // serve static files
