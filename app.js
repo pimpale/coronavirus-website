@@ -46,7 +46,7 @@ function downloadChunk(req, res) {
 }
 
 async function initialize() {
-  client = await mongodb.MongoClient.connect(`mongodb://localhost:27017`);
+  client = await mongodb.MongoClient.connect(`mongodb://localhost:27017`, {useNewUrlParser: true, useUnifiedTopology: true});
   db = client.db('test');
   app = express();
   // configure to use body parser
