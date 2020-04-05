@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongodb = require('mongodb');
 const compression = require('compression');
+const {check, validationResult} = require('express-validator');
 
 let client;
 let db;
@@ -32,17 +33,20 @@ function uploadLocations(req, res) {
 
 /**
  * Takes a get request and gives all the files in the chunk
+ * Accepts query parameters: chunk_lat (
  * Dont call manually
  * @param {req} req The express request
  * @param {res} res The express response
  */
 function downloadChunk(req, res) {
-  const chunk = {
-    chunk_lat: req.query.chunk_lat,
-    chunk_lng: req.query.chunk_lng,
-    chunk_tmprl: req.query.chunk_tmprl,
-  };
-  console.log('got here!:', chunk);
+  validationResult(req).throw();
+
+  const latMin = req.query.lat_min;
+  const lngMin = req.query.lng_min;
+  const latMax = req.query.lat_max;
+  const lngMax = req.query.lng_max;
+  const tmpMin = req.query.tmp_min;
+  const tmpMax = req.query.tmp_max;
 
   res.send(mapdata[chunk]);
   res.end();
@@ -54,7 +58,10 @@ function downloadChunk(req, res) {
  */
 async function initialize() {
   // Initialize mongodb connection
-  client = await mongodb.MongoClient.connect(`mongodb://localhost`, {useNewUrlParser: true, useUnifiedTopology: true});
+  client = await mongodb.MongoClient.connect(`mongodb://localhost`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
   db = client.db('test');
 
   // If we haven't initialized a collection, do so now
@@ -95,7 +102,14 @@ async function initialize() {
   app.use(compression());
   // Add methods
   app.post('/api/uploadlocations/', uploadLocations);
-  app.get('/api/downloadchunk/', downloadChunk);
+  app.get('/api/downloadchunk/', [
+    check.query('lat_min', 'enter a valid minimum latitude').isFloat(),
+    check.query('lat_max', 'enter a valid maximum latitude').isFloat(),
+    check.query('lng_min', 'enter a valid minimum longitude').isFloat(),
+    check.query('lng_max', 'enter a valid maximum longitude').isFloat(),
+    check.query('tmp_min', 'enter a valid minimum timestamp').isInteger(),
+    check.query('tmp_max', 'enter a valid maximum timestamp').isInteger(),
+  ], downloadChunk);
 
   // serve static files
   app.use(express.static('webapp'));
