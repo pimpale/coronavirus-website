@@ -18,9 +18,13 @@ let app;
  * @param {res} res The express response
  */
 function uploadLocations(req, res) {
-  validationResult(req).throw();
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).json({errors: errors.array()});
+    return;
+  }
 
-  db.insertMany(req.body.map((x) => ({
+  db.collection('locations').insertMany(req.body.map((x) => ({
     latitude: x.latitude,
     longitude: x.longitude,
     timestamp: x.timestamp,
@@ -41,7 +45,11 @@ function uploadLocations(req, res) {
  * @param {res} res The express response
  */
 function downloadChunk(req, res) {
-  validationResult(req).throw();
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(422).json({errors: errors.array()});
+    return;
+  }
 
   const latMin = req.query.lat_min;
   const lngMin = req.query.lng_min;
@@ -50,19 +58,18 @@ function downloadChunk(req, res) {
   const tmpMin = req.query.tmp_min;
   const tmpMax = req.query.tmp_max;
 
-  res.send(db.locations.find({
-    latitude: {$and: [{$gte: latMin}, {$lt: latMax}]},
-    longitude: {$and: [{$gte: lngMin}, {$lt: lngMax}]},
-    timestamp: {$and: [{$gte: tmpMin}, {$lt: tmpMax}]},
+  const results = db.collection('locations').find({
+    latitude: {$gte: latMin, $lt: latMax},
+    longitude: {$gte: lngMin, $lt: lngMax},
+    timestamp: {$gte: tmpMin, $lt: tmpMax},
   }, {
     projection: {
       _id: 0,
-      latitude: 1,
-      longitude: 1,
-      timestamp: 1,
       ip: 0,
     },
-  }));
+  }).toArray();
+
+  res.send(results);
   res.end();
 }
 
@@ -106,7 +113,7 @@ async function initialize() {
         },
       },
     });
-    await db.locations.createIndex({latitude: 1, longitude: 1, timestamp: 1});
+    await db.collection('locations').createIndex({latitude: 1, longitude: 1, timestamp: 1});
   }
 
   app = express();

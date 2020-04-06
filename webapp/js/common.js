@@ -1,14 +1,24 @@
-"use strict"
+'use strict';
 
 /* global moment */
 
 const INT32_MAX = 0xffffffff;
 
-// use await sleep(some milliseconds)
+/**
+ * Returns a promise that will be resolved in some milliseconds
+ * use await sleep(some milliseconds)
+ * @param {int} ms milliseconds to sleep for
+ * @return {Promise} a promise that will resolve in ms milliseconds
+ */
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * Checks if a string is null or has no length
+ * @param {String} str the string to check
+ * @return {boolean} false if the string is null or it has zero length
+ */
 function isEmpty(str) {
   return (!str || 0 === str.length);
 }

@@ -102,20 +102,22 @@ async function process(file) {
     const longitude = loc.longitudeE7 * SCALAR_E7;
     const timestamp = loc.timestampMs;
 
-    let marker = L.marker([latitude, longitude]).addTo(map);
+    if (Math.random() > 0.999) {
+      // let marker = L.marker([latitude, longitude]).addTo(map);
+    }
 
     // while we're processing this, we need to generate a list of chunks.
     // these chunks represent the area * time we will ask for data
     // Each chunk is a square 10th of a degree
     // SCALAR_E1
     const chunk = chunkify(latitude, longitude, timestamp);
-    chunkrequesturls.add(`${apiUrl()}/downloadchunk/?` +
-      `lat_min=${chunk.latMin}` +
-      `lat_max=${chunk.latMax}` +
-      `lng_min=${chunk.lngMin}` +
-      `lng_max=${chunk.lngMax}` +
-      `tmp_min=${chunk.tmpMin}` +
-      `tmp_max=${chunk.tmpMax}`);
+    chunkrequesturls.add(`${apiUrl()}/downloadchunk/` +
+      `?lat_min=${chunk.latMin}` +
+      `&lat_max=${chunk.latMax}` +
+      `&lng_min=${chunk.lngMin}` +
+      `&lng_max=${chunk.lngMax}` +
+      `&tmp_min=${chunk.tmpMin}` +
+      `&tmp_max=${chunk.tmpMax}`);
 
     // return the transformed object
     return {
