@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongodb = require('mongodb');
 const compression = require('compression');
-const {check, validationResult} = require('express-validator');
+const {check, query, validationResult} = require('express-validator');
 
 let client;
 let db;
@@ -18,6 +18,8 @@ let app;
  * @param {res} res The express response
  */
 function uploadLocations(req, res) {
+  validationResult(req).throw();
+
   db.insertMany(req.body.map((x) => ({
     latitude: x.latitude,
     longitude: x.longitude,
@@ -49,9 +51,9 @@ function downloadChunk(req, res) {
   const tmpMax = req.query.tmp_max;
 
   res.send(db.locations.find({
-    latitude: {$and: [{$gte: latMin}, {lt: latMax}]},
-    longitude: {$and: [{$gte: lngMin}, {lt: lngMax}]},
-    timestamp: {$and: [{$gte: tmpMin}, {lt: tmpMax}]},
+    latitude: {$and: [{$gte: latMin}, {$lt: latMax}]},
+    longitude: {$and: [{$gte: lngMin}, {$lt: lngMax}]},
+    timestamp: {$and: [{$gte: tmpMin}, {$lt: tmpMax}]},
   }, {
     projection: {
       _id: 0,
@@ -120,12 +122,12 @@ async function initialize() {
   ], uploadLocations);
   app.get('/api/downloadchunk/', [
     // Ensure user puts in all of the necessary values
-    check.query('lat_min', 'enter a valid minimum latitude').isFloat(),
-    check.query('lat_max', 'enter a valid maximum latitude').isFloat(),
-    check.query('lng_min', 'enter a valid minimum longitude').isFloat(),
-    check.query('lng_max', 'enter a valid maximum longitude').isFloat(),
-    check.query('tmp_min', 'enter a valid minimum timestamp').isInt(),
-    check.query('tmp_max', 'enter a valid maximum timestamp').isInt(),
+    query('lat_min', 'enter a valid minimum latitude').isFloat(),
+    query('lat_max', 'enter a valid maximum latitude').isFloat(),
+    query('lng_min', 'enter a valid minimum longitude').isFloat(),
+    query('lng_max', 'enter a valid maximum longitude').isFloat(),
+    query('tmp_min', 'enter a valid minimum timestamp').isInt(),
+    query('tmp_max', 'enter a valid maximum timestamp').isInt(),
   ], downloadChunk);
 
   // serve static files
