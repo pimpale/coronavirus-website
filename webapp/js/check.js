@@ -45,7 +45,7 @@ function loadmap() {
     },
   }));
 
-  map.on(L.Draw.Event.CREATED, function(event) {
+  map.on(L.Draw.Event.CREATED, function (event) {
     const layer = event.layer;
     drawnItems.addLayer(layer);
   });
@@ -77,9 +77,9 @@ function chunkify(latitude, longitude, timestamp) {
   const latlngTrunc = (x) => Math.trunc(x * 10);
   const latlngRoundD = (x) => latlngTrunc(x) / 10;
   const latlngRoundU = (x) => (latlngTrunc(x) + 1) / 10;
-  const timestampTrunc = (x) => Math.trunc(x / 10e5);
-  const timestampRoundD = (x) => timestampTrunc(x) * 10e5;
-  const timestampRoundU = (x) => (timestampTrunc(x) + 1) * 10e5;
+  const timestampTrunc = (x) => Math.trunc(x / 10e7);
+  const timestampRoundD = (x) => timestampTrunc(x) * 10e7;
+  const timestampRoundU = (x) => (timestampTrunc(x) + 1) * 10e7;
   return {
     latMin: latlngRoundD(latitude),
     latMax: latlngRoundU(latitude),
@@ -93,41 +93,49 @@ function chunkify(latitude, longitude, timestamp) {
 /**
  * Sends requests to the server
  * @param {File} file: the file to process
+ * @param {long} minTimestamp the minimum time to consider
+ * @param {long} maxTimestamp the maximum time to consider
  */
-async function process(file) {
-  const chunkrequesturls = new Set();
+async function process(file, minTimestamp, maxTimestamp) {
+  const chunkrequests = new Map();
 
-  const pts = JSON.parse(await file.text()).locations.map((loc) => {
-    const latitude = loc.latitudeE7 * SCALAR_E7;
-    const longitude = loc.longitudeE7 * SCALAR_E7;
-    const timestamp = loc.timestampMs;
+  const pts = JSON.parse(await file.text()).locations
+    .filter((loc) => loc.timestampMs >= minTimestamp && loc.timestampMs < maxTimestamp)
+    .map((loc) => {
+      const latitude = loc.latitudeE7 * SCALAR_E7;
+      const longitude = loc.longitudeE7 * SCALAR_E7;
+      const timestamp = loc.timestampMs;
 
-    if (Math.random() > 0.999) {
-      // let marker = L.marker([latitude, longitude]).addTo(map);
-    }
+      if (Math.random() > 0.999) {
+         let marker = L.marker([latitude, longitude]).addTo(map);
+      }
 
-    // while we're processing this, we need to generate a list of chunks.
-    // these chunks represent the area * time we will ask for data
-    // Each chunk is a square 10th of a degree
-    // SCALAR_E1
-    const chunk = chunkify(latitude, longitude, timestamp);
-    chunkrequesturls.add(`${apiUrl()}/downloadchunk/` +
-      `?lat_min=${chunk.latMin}` +
-      `&lat_max=${chunk.latMax}` +
-      `&lng_min=${chunk.lngMin}` +
-      `&lng_max=${chunk.lngMax}` +
-      `&tmp_min=${chunk.tmpMin}` +
-      `&tmp_max=${chunk.tmpMax}`);
+      // while we're processing this, we need to generate a list of chunks.
+      // these chunks represent the area * time we will ask for data
+      // Each chunk is a square 10th of a degree
+      // SCALAR_E1
+      const chunk = chunkify(latitude, longitude, timestamp);
+      const chunkurl = `${apiUrl()}/downloadchunk/` +
+        `?lat_min=${chunk.latMin}` +
+        `&lat_max=${chunk.latMax}` +
+        `&lng_min=${chunk.lngMin}` +
+        `&lng_max=${chunk.lngMax}` +
+        `&tmp_min=${chunk.tmpMin}` +
+        `&tmp_max=${chunk.tmpMax}`;
+      if (!chunkrequests.has(chunkurl)) {
+        chunkrequests.set(chunkurl, fetchJson(chunkurl));
+      }
 
-    // return the transformed object
-    return {
-      latitude: latitude,
-      longitude: longitude,
-      timestamp: timestamp,
-    };
-  });
+      // return the transformed object
+      return {
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: timestamp,
+      };
+    });
 
-  const chunks = Array.from(chunkrequesturls).map((cru) => fetchJson(cru));
+  const chunks = await Promise.all(chunkrequests.values());
+
   console.log(chunks);
 }
 
@@ -136,12 +144,12 @@ async function process(file) {
  * when the file handler loads a file, we process it
  */
 function loadfilehandler() {
-  $('#customFile').change(async function() {
+  $('#customFile').change(async function () {
     await process(this.files[0]);
   });
 }
 
-$(document).ready(async function() {
+$(document).ready(async function () {
   loadmap();
   loadfilehandler();
 });
