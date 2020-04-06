@@ -48,7 +48,19 @@ function downloadChunk(req, res) {
   const tmpMin = req.query.tmp_min;
   const tmpMax = req.query.tmp_max;
 
-  res.send(mapdata[chunk]);
+  res.send(db.locations.find({
+    latitude: {$and: [{$gte: latMin}, {lt: latMax}]},
+    longitude: {$and: [{$gte: lngMin}, {lt: lngMax}]},
+    timestamp: {$and: [{$gte: tmpMin}, {lt: tmpMax}]},
+  }, {
+    projection: {
+      _id: 0,
+      latitude: 1,
+      longitude: 1,
+      timestamp: 1,
+      ip: 0,
+    },
+  }));
   res.end();
 }
 
@@ -101,14 +113,19 @@ async function initialize() {
   app.use(bodyParser.json());
   app.use(compression());
   // Add methods
-  app.post('/api/uploadlocations/', uploadLocations);
+  app.post('/api/uploadlocations/', [
+    check('*.latitude', 'must be valid latitude in float form').isFloat(),
+    check('*.longitude', 'must be valid longitude in float form').isFloat(),
+    check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
+  ], uploadLocations);
   app.get('/api/downloadchunk/', [
+    // Ensure user puts in all of the necessary values
     check.query('lat_min', 'enter a valid minimum latitude').isFloat(),
     check.query('lat_max', 'enter a valid maximum latitude').isFloat(),
     check.query('lng_min', 'enter a valid minimum longitude').isFloat(),
     check.query('lng_max', 'enter a valid maximum longitude').isFloat(),
-    check.query('tmp_min', 'enter a valid minimum timestamp').isInteger(),
-    check.query('tmp_max', 'enter a valid maximum timestamp').isInteger(),
+    check.query('tmp_min', 'enter a valid minimum timestamp').isInt(),
+    check.query('tmp_max', 'enter a valid maximum timestamp').isInt(),
   ], downloadChunk);
 
   // serve static files
