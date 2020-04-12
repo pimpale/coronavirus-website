@@ -45,7 +45,7 @@ function loadmap() {
     },
   }));
 
-  map.on(L.Draw.Event.CREATED, function (event) {
+  map.on(L.Draw.Event.CREATED, function(event) {
     const layer = event.layer;
     drawnItems.addLayer(layer);
   });
@@ -107,7 +107,7 @@ async function process(file, minTimestamp, maxTimestamp) {
       const timestamp = loc.timestampMs;
 
       if (Math.random() > 0.999) {
-         let marker = L.marker([latitude, longitude]).addTo(map);
+        let marker = L.marker([latitude, longitude]).addTo(map);
       }
 
       // while we're processing this, we need to generate a list of chunks.
@@ -140,16 +140,34 @@ async function process(file, minTimestamp, maxTimestamp) {
 }
 
 
+
+/**
+ * Instruction step 0
+ */
+async function instruction0() {
+  $('#mapinfo-title').html('Map');
+  $('#mapinfo-subtext').html('Complete step 1 in order to load your data.');
+}
+
 /**
  * when the file handler loads a file, we process it
  */
-function loadfilehandler() {
-  $('#customFile').change(async function () {
-    await process(this.files[0]);
+async function instruction1() {
+  // when a file is uploaded
+  $('#customFile').change(async function() {
+    const f = this.files[0];
+    // enable the button and set a listener
+    $('#instruction-selectfile')[0].disabled = false;
+    $('#instruction1-selectfile').button().click(function() {
+      const processedjson = await process(f, Date.parse('2020-01-01'), Date.now());
+      instruction2(processedjson);
+    });
   });
+
 }
 
 $(document).ready(async function () {
   loadmap();
-  loadfilehandler();
+  await instruction0();
+  await instruction1();
 });

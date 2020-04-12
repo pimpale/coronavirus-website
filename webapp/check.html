@@ -63,10 +63,23 @@
       <div class="card bg-dark">
         <div class="card-body">
           <h5 class="card-title text-light">Instructions</h5>
-          <p class="card-text">Visit <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> to
-            download your location history. To do this, click the "Select None" button, and then reselect "Location
-            History". Make sure to export the data as a json file. Google will then send you a link to download your
-            data. Unzip this file and upload <code>Location History.json</code>.</p>
+          <p class="card-text">
+            Visit <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> to download
+            your location history. To do this, click the "Select None" button, and then reselect "Location
+            History". Make sure to export the data as a json file. Google will then send you a link to
+            download your data.
+          </p>
+        </div>
+      </div>
+      <!-- Upload -->
+      <div class="card bg-dark my-3">
+        <div class="card-body">
+          <h5 class="card-title text-light">1. Select File</h5>
+          <p class="card-text">
+            Unzip the file you downloaded from Google Takeout and upload <code>Location History.json</code>.
+            Then, click select. Parsing this file will usually take about 5 minutes, especially if the file
+            size is very large. If the website hangs, please allow it to continue.
+          </p>
           <form>
             <div class="custom-file">
               <input type="file" class="custom-file-input" id="customFile">
@@ -81,16 +94,7 @@
               $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
             });
           </script>
-        </div>
-      </div>
-      <!-- Upload -->
-      <div class="card bg-dark my-3">
-        <div class="card-body">
-          <h5 class="card-title text-light">Upload</h5>
-
-
-          <p class="card-text">If you have coronavirus, then please consider uploading your location data to help others determine if they have been exposed.</p>
-          <a class="btn my-1">Upload</a>
+          <a class="btn my-1 btn-primary disabled" id="instruction1-selectfile">Select</a>
         </div>
       </div>
     </div>
@@ -107,16 +111,17 @@
         <div class="card col-sm-10 palette-level-two">
           <div class="card-body">
             <div class="input-group">
-              <h5 class="card-title text-center">Map</h5>
+              <h5 class="card-title text-center" id="mapinfo-title"></h5>
             </div>
-            <p class="card-text">Once you upload the data, you should see potential interactions.</p>
+            <p class="card-text" id="mapinfo-subtext"></p>
 
             <form>
               <div class="input-group mb-3 col-sm-4">
                 <div class="input-group-prepend">
                   <span class="input-group-text">Select Date Range</span>
                 </div>
-                <input type="text" name="daterange" class="form-control form-control input" value="01/01/2020 - 01/01/2021">
+                <input type="text" name="daterange" class="form-control form-control input"
+                  value="01/01/2020 - 01/01/2021">
               </div>
             </form>
 

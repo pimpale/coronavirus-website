@@ -4,12 +4,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongodb = require('mongodb');
 const compression = require('compression');
-const {check, query, validationResult} = require('express-validator');
+const {check, validationResult} = require('express-validator');
 
 let client;
 let db;
 let app;
-
 
 /**
  * Takes a post request, and loads the body into the mongodb
@@ -38,31 +37,27 @@ function uploadLocations(req, res) {
 }
 
 /**
- * Takes a get request and gives all the files in the chunk
- * Accepts query parameters: chunk_lat (
+ * Takes a post request with all the user's locations
+ * For each of them, does a query to compare the location
+ * Will probably crash...
  * Dont call manually
  * @param {req} req The express request
  * @param {res} res The express response
  */
-function downloadChunk(req, res) {
+function checkLocations(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(422).json({errors: errors.array()});
     return;
   }
 
-  const latMin = req.query.lat_min;
-  const lngMin = req.query.lng_min;
-  const latMax = req.query.lat_max;
-  const lngMax = req.query.lng_max;
-  const tmpMin = req.query.tmp_min;
-  const tmpMax = req.query.tmp_max;
+  const locs = req.body.map((loc) => ({
+    latitude: {$gte: loc.latitude - 0.1, $lt: latMax + 0.1},
+    longitude: {$gte: loc.longitude - 0.1, $lt: loc.longitude + 0.1},
+    timestamp: {$gte: loc.timestamp - 10e7, $lt: loc.timestamp},
+  }));
 
-  const results = db.collection('locations').find({
-    latitude: {$gte: latMin, $lt: latMax},
-    longitude: {$gte: lngMin, $lt: lngMax},
-    timestamp: {$gte: tmpMin, $lt: tmpMax},
-  }, {
+  const results = db.collection('locations').find({$or: locs}, {
     projection: {
       _id: 0,
       ip: 0,
@@ -113,7 +108,11 @@ async function initialize() {
         },
       },
     });
-    await db.collection('locations').createIndex({latitude: 1, longitude: 1, timestamp: 1});
+    await db.collection('locations').createIndex({
+      latitude: 1,
+      longitude: 1,
+      timestamp: 1,
+    });
   }
 
   app = express();
@@ -127,15 +126,12 @@ async function initialize() {
     check('*.longitude', 'must be valid longitude in float form').isFloat(),
     check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
   ], uploadLocations);
-  app.get('/api/downloadchunk/', [
+  app.get('/api/checklocations/', [
     // Ensure user puts in all of the necessary values
-    query('lat_min', 'enter a valid minimum latitude').isFloat(),
-    query('lat_max', 'enter a valid maximum latitude').isFloat(),
-    query('lng_min', 'enter a valid minimum longitude').isFloat(),
-    query('lng_max', 'enter a valid maximum longitude').isFloat(),
-    query('tmp_min', 'enter a valid minimum timestamp').isInt(),
-    query('tmp_max', 'enter a valid maximum timestamp').isInt(),
-  ], downloadChunk);
+    check('*.latitude', 'must be valid latitude in float form').isFloat(),
+    check('*.longitude', 'must be valid longitude in float form').isFloat(),
+    check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
+  ], checkLocations);
 
   // serve static files
   app.use(express.static('webapp'));
