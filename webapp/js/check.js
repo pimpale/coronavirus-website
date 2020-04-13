@@ -1,6 +1,10 @@
-/* global sleep L fetchJson apiUrl */
+/* global moment sleep L fetchJson apiUrl */
+
+const minTimestamp = moment('2017').valueOf();
+const maxTimestamp = moment('2018').valueOf();
 
 let map = null;
+let slider = null;
 
 /**
  * loads the map
@@ -86,21 +90,42 @@ async function instruction2(file) {
     Note that your data must be under 10MB for upload`);
 
   // corona didn't really get started till 2020
-  const minTimestamp = Date.parse('2017-01-01');
-  const maxTimestamp = Date.now('2018-01-01');
-
   const processed = JSON.parse(await file.text()).locations
     .filter((loc) => loc.timestampMs >= minTimestamp && loc.timestampMs < maxTimestamp)
-    .map(async (loc) => ({
+    .map((loc) => ({
       latitude: loc.latitudeE7 * 10e-8,
       longitude: loc.longitudeE7 * 10e-8,
       timestamp: loc.timestampMs,
     }));
 
+  for (const loc of processed) {
+    await sleep(100);
+    let marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
+  }
+
+}
+
+function loadslider() {
+  $("#map-daterange").ionRangeSlider({
+    disabled: true,
+    skin: "round",
+    type: "double",
+    grid: true,
+    min: minTimestamp,
+    max: maxTimestamp,
+    from: minTimestamp,
+    to: maxTimestamp,
+    prettify: (ts) => moment(ts).format('MMMM Do, YYYY'),
+  });
 }
 
 $(document).ready(async function () {
   loadmap();
+  loadslider();
   // begin the process
   await instruction0();
 });
+
+
+
+

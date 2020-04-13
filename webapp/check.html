@@ -15,7 +15,7 @@
   <!-- CSS References -->
   <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="vendor/fontawesome-free/css/all.min.css">
-  <link rel="stylesheet" href="vendor/daterangepicker/daterangepicker.css">
+  <link rel="stylesheet" href="vendor/ion-rangeslider/css/ion.rangeSlider.min.css">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="vendor/leaflet-draw/leaflet.draw.css">
   <link rel="stylesheet" href="css/homepage.css">
@@ -24,10 +24,9 @@
   <!-- JS References -->
   <script src="vendor/jquery/jquery.min.js"></script>
   <script src="vendor/bootstrap/js/bootstrap.bundle.js"></script>
+  <script src="vendor/ion-rangeslider/js/ion.rangeSlider.min.js"></script>
   <script src="vendor/popper/js/popper.min.js"></script>
-  <script src="vendor/bootbox/js/bootbox.js"></script>
   <script src="vendor/moment/moment.min.js"></script>
-  <script src="vendor/daterangepicker/daterangepicker.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="vendor/leaflet-draw/leaflet.draw.js"></script>
   <script src="js/common.js"></script>
@@ -114,10 +113,10 @@
               <h5 class="card-title text-center" id="mapinfo-title"></h5>
             </div>
             <p class="card-text" id="mapinfo-subtext"></p>
-
-            <div id="map-slider"></div>
-
-            <div id="mapid" style="height:50vh;"></div>
+            <div id="mapdiv">
+              <input type="text" id="map-daterange"></input>
+              <div id="mapid" class="my-3" style="height:50vh;"></div>
+            </div>
           </div>
         </div>
       </div>
