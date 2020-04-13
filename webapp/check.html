@@ -64,9 +64,9 @@
           <h5 class="card-title text-light">Instructions</h5>
           <p class="card-text">
             Visit <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> to download
-            your location history. To do this, click the "Select None" button, and then reselect "Location
-            History". Make sure to export the data as a json file. Google will then send you a link to
-            download your data.
+            your location history. To do this, click the "Deselect All" button, and then reselect "Location
+            History". Click on the "Multiple Formats" button to download the data as a json file. Google will 
+            then send you a link to download your data.
           </p>
         </div>
       </div>
@@ -94,6 +94,9 @@
             });
           </script>
           <button class="btn my-1 btn-primary" id="instruction1-selectfile">Select</button>
+          <div class="progress" style="height: 20px;">
+            <div class="progress-bar" id="instruction1-progress" role="progressbar"></div>
+          </div>
         </div>
       </div>
     </div>

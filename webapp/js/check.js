@@ -4,7 +4,7 @@ const minTimestamp = moment('2017').valueOf();
 const maxTimestamp = moment('2018').valueOf();
 
 let map = null;
-let slider = null;
+let points = null;
 
 /**
  * loads the map
@@ -59,6 +59,7 @@ function loadmap() {
  * Instruction step 0
  */
 async function instruction0() {
+  $('#mapdiv').hide();
   $('#mapinfo-title').html('Map');
   $('#mapinfo-subtext').html('Complete step 1 in order to load your data.');
   $('#instruction1-selectfile').prop('disabled', true);
@@ -90,7 +91,7 @@ async function instruction2(file) {
     Note that your data must be under 10MB for upload`);
 
   // corona didn't really get started till 2020
-  const processed = JSON.parse(await file.text()).locations
+  points = JSON.parse(await file.text()).locations
     .filter((loc) => loc.timestampMs >= minTimestamp && loc.timestampMs < maxTimestamp)
     .map((loc) => ({
       latitude: loc.latitudeE7 * 10e-8,
@@ -98,8 +99,12 @@ async function instruction2(file) {
       timestamp: loc.timestampMs,
     }));
 
-  for (const loc of processed) {
-    await sleep(100);
+  $('#mapdiv').show();
+
+  for (let i = 0; i < points.length; i+=100) {
+    await sleep(10);
+    const loc  = points[i];
+    $('#instruction1-progress').css('width', `${(i*100.0)/points.length}%`);
     let marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
   }
 
@@ -115,7 +120,7 @@ function loadslider() {
     max: maxTimestamp,
     from: minTimestamp,
     to: maxTimestamp,
-    prettify: (ts) => moment(ts).format('MMMM Do, YYYY'),
+    prettify: (ts) => moment(ts).format('MMM D, YYYY'),
   });
 }
 
