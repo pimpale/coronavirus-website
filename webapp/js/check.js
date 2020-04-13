@@ -1,4 +1,4 @@
-/* global moment sleep L fetchJson apiUrl */
+/* global moment RBush3D sleep L fetchJson apiUrl */
 
 const minTimestamp = moment('2017').valueOf();
 const maxTimestamp = moment('2018').valueOf();
@@ -96,18 +96,41 @@ async function instruction2(file) {
     .map((loc) => ({
       latitude: loc.latitudeE7 * 10e-8,
       longitude: loc.longitudeE7 * 10e-8,
-      timestamp: loc.timestampMs,
+      timestamp: parseInt(loc.timestampMs),
     }));
 
-  $('#mapdiv').show();
+  const tree = RBush3D.build(16, ['latitude', 'longitude', 'timestamp', 'latitude', 'longitude', 'timestamp']);
+  tree.load(points);
 
-  for (let i = 0; i < points.length; i+=100) {
-    await sleep(10);
+  /**
+   * Recursive function to draw levels
+   */
+  async function drawTree(node, level) {
+    if(!node) {
+      return;
+    }
+    await sleep(1);
+    if(node.leaf || level === 6) {
+      L.marker([node.minX, node.minY]).addTo(map);
+    }
+
+    for (var i = 0; i < node.children.length; i++) {
+        await drawTree(node.children[i], level + 1);
+    }
+  }
+
+  $('#mapdiv').show();
+  await drawTree(tree.data, 0);
+
+  return;
+  $('#instruction1-progress-div').show();
+  for (let i = 0; i < points.length; i+=1) {
+    await sleep(1);
     const loc  = points[i];
     $('#instruction1-progress').css('width', `${(i*100.0)/points.length}%`);
     let marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
   }
-
+  $('#instruction1-progress-div').hide();
 }
 
 function loadslider() {
