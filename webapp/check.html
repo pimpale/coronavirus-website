@@ -94,7 +94,7 @@
               $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
             });
           </script>
-          <a class="btn my-1 btn-primary disabled" id="instruction1-selectfile">Select</a>
+          <button class="btn my-1 btn-primary" id="instruction1-selectfile">Select</button>
         </div>
       </div>
     </div>
@@ -115,15 +115,7 @@
             </div>
             <p class="card-text" id="mapinfo-subtext"></p>
 
-            <form>
-              <div class="input-group mb-3 col-sm-4">
-                <div class="input-group-prepend">
-                  <span class="input-group-text">Select Date Range</span>
-                </div>
-                <input type="text" name="daterange" class="form-control form-control input"
-                  value="01/01/2020 - 01/01/2021">
-              </div>
-            </form>
+            <div id="map-slider"></div>
 
             <div id="mapid" style="height:50vh;"></div>
           </div>
