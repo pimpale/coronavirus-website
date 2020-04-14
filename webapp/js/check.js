@@ -9,11 +9,9 @@ let map = null;
 // The {latitude, longitude, timestamp} groups
 let points = null;
 
-// Array of markers Marker[]
-let markers = null;
 
-// The Map<timestamp, MarkerIndex>
-let markermap = null;
+// list of all markers
+let markers = [];
 
 /**
  * loads the map
@@ -67,10 +65,64 @@ function loadmap() {
 function addMarker(latlng, html) {
   let marker = new L.Marker(latlng);
   map.addLayer(marker);
-  if(html != null) {
+  if (html != null) {
     marker.bindPopup(html);
   }
-  return marker;
+  markers.push(marker);
+}
+
+
+/**
+ * renderMap: Renders the markers on the map, making sure to ignore areas that are covered
+ * with a block. Also ignores the areas outside of the given time range Domain: [minT, maxT)
+ * @param minT {int} minimum time in ms to render
+ * @param maxT {int} maximum time in ms to render
+ */
+async function renderMap(minT, maxT) {
+  $('#map-progress-div').show();
+
+  $('#map-daterange').data('ionRangeSlider').update({
+    block: true,
+  });
+
+  // Calculate the points that fit within these places
+  const timely_points = points.filter((x) => x.timestamp >= minT && x.timestamp < maxT);
+  const timely_points_length = timely_points.length;
+
+  let lastloc = null
+
+  for (let i = 0; i < timely_points.length; i++) {
+    // get current location
+    let loc = timely_points[i]
+    if (lastloc != null) {
+      if (Math.hypot(loc.latitude - lastloc.latitude, loc.longitude - lastloc.longitude) > 0.01) {
+        await sleep(1);
+        $('#map-progress').css('width', `${(i * 100.0)/timely_points_length}%`);
+        addMarker([loc.latitude, loc.longitude], moment(loc.timestamp).format('MMM D, hh:ss a'));
+      }
+      lastloc = loc;
+    } else {
+      addMarker([loc.latitude, loc.longitude]);
+      lastloc = loc;
+    }
+  }
+
+  $('#map-daterange').data('ionRangeSlider').update({
+    block: false,
+  });
+
+  $('#map-progress-div').hide();
+  $('#map-progress').css('width', '0%');
+}
+
+/**
+ * totally clean
+ */
+function cleanMap() {
+  for(let i = 0; i < markers.length; i++) {
+    map.removeLayer(markers[i]);
+  }
+  markers = [];
 }
 
 /**
@@ -120,21 +172,7 @@ async function instruction2(file) {
 
   $('#mapdiv').show();
 
-  let lastloc = null;
-  for (let i = 0; i < points.length; i += 1) {
-    const loc = points[i];
-    if(lastloc != null) {
-      if(Math.hypot(loc.latitude - lastloc.latitude, loc.longitude - lastloc.longitude) > 0.01) {
-        addMarker([loc.latitude, loc.longitude], moment(loc.timestamp).format('MMM D, hh:ss a'));
-        await sleep(1);
-      }
-      lastloc = loc;
-    } else {
-      addMarker([loc.latitude, loc.longitude]);
-      await sleep(1);
-      lastloc = loc;
-    }
-  }
+  await renderMap(minTimestamp, maxTimestamp);
 }
 
 function loadslider() {
@@ -147,10 +185,12 @@ function loadslider() {
     from: minTimestamp,
     to: maxTimestamp,
     prettify: (ts) => moment(ts).format('MMM D, YYYY'),
-    onFinish: async function() {
+    onFinish: async function () {
+      // retrieve the millisecond range permitted
       const to = $('#map-daterange').data('to')
       const from = $('#map-daterange').data('from')
-
+      cleanMap();
+      await renderMap(from, to);
     },
   });
 }
