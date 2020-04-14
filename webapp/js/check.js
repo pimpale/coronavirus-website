@@ -1,10 +1,19 @@
-/* global moment RBush3D sleep L fetchJson apiUrl */
+/* global moment sleep L fetchJson apiUrl */
 
 const minTimestamp = moment('2017').valueOf();
 const maxTimestamp = moment('2018').valueOf();
 
+// the map
 let map = null;
+
+// The {latitude, longitude, timestamp} groups
 let points = null;
+
+// Array of markers Marker[]
+let markers = null;
+
+// The Map<timestamp, MarkerIndex>
+let markermap = null;
 
 /**
  * loads the map
@@ -55,6 +64,15 @@ function loadmap() {
   });
 }
 
+function addMarker(latlng, html) {
+  let marker = new L.Marker(latlng);
+  map.addLayer(marker);
+  if(html != null) {
+    marker.bindPopup(html);
+  }
+  return marker;
+}
+
 /**
  * Instruction step 0
  */
@@ -76,6 +94,7 @@ async function instruction1() {
     // enable the button and set a listener
     $('#instruction1-selectfile').prop('disabled', false);
     $('#instruction1-selectfile').button().click(async function () {
+      $('#instruction1-selectfile').prop('disabled', true);
       await instruction2(f);
     });
   });
@@ -99,51 +118,40 @@ async function instruction2(file) {
       timestamp: parseInt(loc.timestampMs),
     }));
 
-  const tree = RBush3D.build(16, ['latitude', 'longitude', 'timestamp', 'latitude', 'longitude', 'timestamp']);
-  tree.load(points);
-
-  /**
-   * Recursive function to draw levels
-   */
-  async function drawTree(node, level) {
-    if(!node) {
-      return;
-    }
-    await sleep(1);
-    if(node.leaf || level === 6) {
-      L.marker([node.minX, node.minY]).addTo(map);
-    }
-
-    for (var i = 0; i < node.children.length; i++) {
-        await drawTree(node.children[i], level + 1);
-    }
-  }
-
   $('#mapdiv').show();
-  await drawTree(tree.data, 0);
 
-  return;
-  $('#instruction1-progress-div').show();
-  for (let i = 0; i < points.length; i+=1) {
-    await sleep(1);
-    const loc  = points[i];
-    $('#instruction1-progress').css('width', `${(i*100.0)/points.length}%`);
-    let marker = L.marker([loc.latitude, loc.longitude]).addTo(map);
+  let lastloc = null;
+  for (let i = 0; i < points.length; i += 1) {
+    const loc = points[i];
+    if(lastloc != null) {
+      if(Math.hypot(loc.latitude - lastloc.latitude, loc.longitude - lastloc.longitude) > 0.01) {
+        addMarker([loc.latitude, loc.longitude], moment(loc.timestamp).format('MMM D, hh:ss a'));
+        await sleep(1);
+      }
+      lastloc = loc;
+    } else {
+      addMarker([loc.latitude, loc.longitude]);
+      await sleep(1);
+      lastloc = loc;
+    }
   }
-  $('#instruction1-progress-div').hide();
 }
 
 function loadslider() {
-  $("#map-daterange").ionRangeSlider({
-    disabled: true,
-    skin: "round",
-    type: "double",
+  $('#map-daterange').ionRangeSlider({
+    skin: 'round',
+    type: 'double',
     grid: true,
     min: minTimestamp,
     max: maxTimestamp,
     from: minTimestamp,
     to: maxTimestamp,
     prettify: (ts) => moment(ts).format('MMM D, YYYY'),
+    onFinish: async function() {
+      const to = $('#map-daterange').data('to')
+      const from = $('#map-daterange').data('from')
+
+    },
   });
 }
 

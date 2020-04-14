@@ -22,7 +22,6 @@
   <link rel="stylesheet" href="css/sidebar.css">
 
   <!-- JS References -->
-  <script src="vendor/rbush3d/rbush3d.min.js"></script>
   <script src="vendor/jquery/jquery.min.js"></script>
   <script src="vendor/bootstrap/js/bootstrap.bundle.js"></script>
   <script src="vendor/ion-rangeslider/js/ion.rangeSlider.min.js"></script>
@@ -66,7 +65,7 @@
           <p class="card-text">
             Visit <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> to download
             your location history. To do this, click the "Deselect All" button, and then reselect "Location
-            History". Click on the "Multiple Formats" button to download the data as a json file. Google will 
+            History". Click on the "Multiple Formats" button to download the data as a json file. Google will
             then send you a link to download your data.
           </p>
         </div>
@@ -95,9 +94,6 @@
             });
           </script>
           <button class="btn my-1 btn-primary" id="instruction1-selectfile">Select</button>
-          <div class="progress" id="instruction1-progress-div" style="height: 20px;display:none;">
-            <div class="progress-bar" id="instruction1-progress" role="progressbar"></div>
-          </div>
         </div>
       </div>
     </div>
@@ -118,7 +114,11 @@
             </div>
             <p class="card-text" id="mapinfo-subtext"></p>
             <div id="mapdiv">
-              <input type="text" id="map-daterange"></input>
+              <div class="row">
+                <div class="col-sm-4">
+                  <input type="text" id="map-daterange"></input>
+                </div>
+              </div>
               <div id="mapid" class="my-3" style="height:50vh;"></div>
             </div>
           </div>
