@@ -1,7 +1,7 @@
-/* global moment sleep L fetchJson apiUrl */
+/* global moment sleep L */
 
-const minTimestamp = moment('2017').valueOf();
-const maxTimestamp = moment('2018').valueOf();
+const globalMinTimestamp = moment('2017').valueOf();
+const globalMaxTimestamp = moment('2018').valueOf();
 
 // the map
 let map = null;
@@ -9,9 +9,13 @@ let map = null;
 // The {latitude, longitude, timestamp} groups
 let points = null;
 
-
 // list of all markers
 let markers = [];
+
+// the square areas created by the user
+let exclusionZones = [];
+let minTimestamp = globalMinTimestamp;
+let maxTimestamp = globalMaxTimestamp;
 
 /**
  * loads the map
@@ -56,9 +60,27 @@ function loadmap() {
     },
   }));
 
-  map.on(L.Draw.Event.CREATED, function (event) {
-    const layer = event.layer;
-    drawnItems.addLayer(layer);
+  function genExclusionZones() {
+    exclusionZones = [];
+    drawnItems.eachLayer((l) => {
+      exclusionZones.push(l.getBounds());
+    })
+  }
+
+  map.on(L.Draw.Event.CREATED, async function (event) {
+    if(!rendering) {
+      drawnItems.addLayer(event.layer);
+      genExclusionZones();
+      await renderMap();
+    }
+  });
+
+  map.on(L.Draw.Event.DELETED, async function (event) {
+    if(!rendering) {
+      drawnItems.removeLayer(event.layer);
+      genExclusionZones();
+      await renderMap();
+    }
   });
 }
 
@@ -71,14 +93,19 @@ function addMarker(latlng, html) {
   markers.push(marker);
 }
 
-
+let rendering = false;
 /**
- * renderMap: Renders the markers on the map, making sure to ignore areas that are covered
+ * Renders the markers on the map, making sure to ignore areas that are covered
  * with a block. Also ignores the areas outside of the given time range Domain: [minT, maxT)
- * @param minT {int} minimum time in ms to render
- * @param maxT {int} maximum time in ms to render
  */
-async function renderMap(minT, maxT) {
+async function renderMap() {
+  rendering = true;
+  // clean map
+  for (let i = 0; i < markers.length; i++) {
+    map.removeLayer(markers[i]);
+  }
+  markers = [];
+
   $('#map-progress-div').show();
 
   $('#map-daterange').data('ionRangeSlider').update({
@@ -86,25 +113,36 @@ async function renderMap(minT, maxT) {
   });
 
   // Calculate the points that fit within these places
-  const timely_points = points.filter((x) => x.timestamp >= minT && x.timestamp < maxT);
-  const timely_points_length = timely_points.length;
-
-  let lastloc = null
-
-  for (let i = 0; i < timely_points.length; i++) {
-    // get current location
-    let loc = timely_points[i]
-    if (lastloc != null) {
-      if (Math.hypot(loc.latitude - lastloc.latitude, loc.longitude - lastloc.longitude) > 0.01) {
-        await sleep(1);
-        $('#map-progress').css('width', `${(i * 100.0)/timely_points_length}%`);
-        addMarker([loc.latitude, loc.longitude], moment(loc.timestamp).format('MMM D, hh:ss a'));
+  const renderable_points = points
+    .filter((x) => x.timestamp >= minTimestamp && x.timestamp < maxTimestamp)
+    .filter((loc) => {
+      for (const box of exclusionZones) {
+        if (box.contains([loc.latitude, loc.longitude])) {
+          return false
+        }
       }
-      lastloc = loc;
+      return true;
+    });
+  // get the length
+  const renderable_points_length = renderable_points.length;
+
+  let lastlatlng = null
+  for (let i = 0; i < renderable_points_length; i++) {
+    // get current location
+    let loc = renderable_points[i]
+    const latlng = [loc.latitude, loc.longitude]
+    if (lastlatlng != null) {
+      if (Math.hypot(latlng[0] - lastlatlng[0], latlng[1] - lastlatlng[1]) < 0.01) {
+        continue;
+      }
+      lastlatlng = latlng;
     } else {
-      addMarker([loc.latitude, loc.longitude]);
-      lastloc = loc;
+      lastlatlng = latlng;
     }
+
+    await sleep(1);
+    $('#map-progress').css('width', `${(i * 100.0) / renderable_points_length}%`);
+    addMarker(latlng, moment(loc.timestamp).format('MMM D, hh:ss a'));
   }
 
   $('#map-daterange').data('ionRangeSlider').update({
@@ -113,16 +151,7 @@ async function renderMap(minT, maxT) {
 
   $('#map-progress-div').hide();
   $('#map-progress').css('width', '0%');
-}
-
-/**
- * totally clean
- */
-function cleanMap() {
-  for(let i = 0; i < markers.length; i++) {
-    map.removeLayer(markers[i]);
-  }
-  markers = [];
+  rendering = false;
 }
 
 /**
@@ -172,7 +201,7 @@ async function instruction2(file) {
 
   $('#mapdiv').show();
 
-  await renderMap(minTimestamp, maxTimestamp);
+  await renderMap();
 }
 
 function loadslider() {
@@ -187,10 +216,9 @@ function loadslider() {
     prettify: (ts) => moment(ts).format('MMM D, YYYY'),
     onFinish: async function () {
       // retrieve the millisecond range permitted
-      const to = $('#map-daterange').data('to')
-      const from = $('#map-daterange').data('from')
-      cleanMap();
-      await renderMap(from, to);
+      minTimestamp = $('#map-daterange').data('from')
+      maxTimestamp = $('#map-daterange').data('to')
+      await renderMap();
     },
   });
 }
