@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="vendor/ion-rangeslider/css/ion.rangeSlider.min.css">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="vendor/leaflet-draw/leaflet.draw.css">
+  <link rel="stylesheet" href="css/headerfix-dark.css">
   <link rel="stylesheet" href="css/homepage.css">
   <link rel="stylesheet" href="css/sidebar.css">
 
@@ -59,25 +60,17 @@
   <nav id="sidebar" class="text-light bg-dark sidebar-fixed">
     <div class="mx-3 my-5 py-5">
       <!-- Instructions -->
-      <div class="card bg-dark">
-        <div class="card-body">
-          <h5 class="card-title text-light">Instructions</h5>
-          <p class="card-text">
-            Visit <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> to download
-            your location history. To do this, click the "Deselect All" button, and then reselect "Location
-            History". Click on the "Multiple Formats" button to download the data as a json file. Google will
-            then send you a link to download your data.
-          </p>
-        </div>
-      </div>
+      <h3 class="text-light">Instructions</h3>
       <!-- Upload -->
       <div class="card bg-dark my-3">
         <div class="card-body">
-          <h5 class="card-title text-light">1. Select File</h5>
+          <h6 class="card-title text-light">1. Select File</h6>
           <p class="card-text">
-            Unzip the file you downloaded from Google Takeout and upload <code>Location History.json</code>.
-            Then, click select. Parsing this file will usually take about 5 minutes, especially if the file
-            size is very large. If the website hangs, please allow it to continue.
+            Visit <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> to download
+            your location history. You can speed up your download by clicking the "Deselect All"
+            button, and then reselecting "Location History". Make sure to click on the "Multiple Formats"
+            button to ensure your data will be in JSON format. Google will email you a file containing your
+            data. From this file, upload <code>Location History.json</code>. Then, click select.
           </p>
           <form>
             <div class="custom-file">
@@ -119,6 +112,7 @@
               <div class="progress" id="map-progress-div" style="height: 20px;display:none;">
                 <div class="progress-bar" id="map-progress" role="progressbar">Building Index...</div>
               </div>
+              <button class="btn my-1 btn-primary" id="instruction2-confirm">Upload Data</button>
             </div>
           </div>
         </div>

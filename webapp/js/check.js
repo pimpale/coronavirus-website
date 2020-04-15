@@ -229,7 +229,3 @@ $(document).ready(async function () {
   // begin the process
   await instruction0();
 });
-
-
-
-
