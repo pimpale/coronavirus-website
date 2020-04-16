@@ -1,4 +1,4 @@
-/* global moment sleep L */
+/* global moment sleep L apiUrl fetchJson */
 
 const globalMinTimestamp = moment('2017').valueOf();
 const globalMaxTimestamp = moment('2018').valueOf();
@@ -45,6 +45,7 @@ function loadmap() {
     position: 'topright',
     edit: {
       featureGroup: drawnItems,
+      edit:false,
       poly: {
         allowIntersection: false,
       },
@@ -94,6 +95,20 @@ function addMarker(latlng, html) {
 }
 
 let rendering = false;
+
+function getValidPoints() {
+   return points
+    .filter((x) => x.timestamp >= minTimestamp && x.timestamp < maxTimestamp)
+    .filter((loc) => {
+      for (const box of exclusionZones) {
+        if (box.contains([loc.latitude, loc.longitude])) {
+          return false
+        }
+      }
+      return true;
+    });
+}
+
 /**
  * Renders the markers on the map, making sure to ignore areas that are covered
  * with a block. Also ignores the areas outside of the given time range Domain: [minT, maxT)
@@ -113,18 +128,16 @@ async function renderMap() {
   });
 
   // Calculate the points that fit within these places
-  const renderable_points = points
-    .filter((x) => x.timestamp >= minTimestamp && x.timestamp < maxTimestamp)
-    .filter((loc) => {
-      for (const box of exclusionZones) {
-        if (box.contains([loc.latitude, loc.longitude])) {
-          return false
-        }
-      }
-      return true;
-    });
+  const renderable_points = getValidPoints();
   // get the length
   const renderable_points_length = renderable_points.length;
+
+  $('#instruction2-counter').html(`${(renderable_points_length/10e4).toFixed(2)}/10.00 Megabytes Used`)
+  if(renderable_points/10e4 < 10) {
+    $('#instruction2-confirm').prop('disabled', false);
+  } else {
+    $('#instruction2-confirm').prop('disabled', true);
+  }
 
   let lastlatlng = null
   for (let i = 0; i < renderable_points_length; i++) {
@@ -186,9 +199,10 @@ async function instruction1() {
  */
 async function instruction2(file) {
   $('#mapinfo-title').html('Your Locations');
+  $('#instruction2-confirm').prop('disabled', false);
   $('#mapinfo-subtext').html(`Use the slider below to select the date ranges
-    you want to check. Use the rectangle tool to exclude areas from the check.
-    Note that your data must be under 10MB for upload`);
+    you want to check. Use the rectangle tool to block areas from the upload.
+    Note that your data must be under 10MB for upload.`);
 
   // corona didn't really get started till 2020
   points = JSON.parse(await file.text()).locations
@@ -202,6 +216,18 @@ async function instruction2(file) {
   $('#mapdiv').show();
 
   await renderMap();
+
+  $('#instruction2-confirm').button().click(async function() {
+    await instruction3();
+  })
+}
+
+async function instruction3() {
+  const ret = fetchJson(`${apiUrl()}/checklocations/`, {
+    method:'post',
+    body: JSON.stringify(getValidPoints)
+  });
+  console.log(ret);
 }
 
 function loadslider() {

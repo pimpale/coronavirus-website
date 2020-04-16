@@ -1,3 +1,5 @@
+/* globals require */
+
 'use strict';
 // Imports
 const express = require('express');
@@ -52,7 +54,7 @@ function checkLocations(req, res) {
   }
 
   const locs = req.body.map((loc) => ({
-    latitude: {$gte: loc.latitude - 0.1, $lt: latMax + 0.1},
+    latitude: {$gte: loc.latitude - 0.1, $lt: loc.latitude + 0.1},
     longitude: {$gte: loc.longitude - 0.1, $lt: loc.longitude + 0.1},
     timestamp: {$gte: loc.timestamp - 10e7, $lt: loc.timestamp},
   }));

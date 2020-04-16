@@ -133,8 +133,8 @@ function parseResponse(response) {
 }
 
 // Fetches json given a URL
-async function fetchJson(url) {
-  let response = await fetch(url);
+async function fetchJson(url, params={}) {
+  let response = await fetch(url, params);
   if (!response.ok) {
     console.log(response);
     throw Error(response.statusText);
