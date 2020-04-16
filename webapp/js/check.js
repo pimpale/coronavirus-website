@@ -133,7 +133,7 @@ async function renderMap() {
   const renderable_points_length = renderable_points.length;
 
   $('#instruction2-counter').html(`${(renderable_points_length/10e4).toFixed(2)}/10.00 Megabytes Used`)
-  if(renderable_points/10e4 < 10) {
+  if(renderable_points_length/10e4 < 10) {
     $('#instruction2-confirm').prop('disabled', false);
   } else {
     $('#instruction2-confirm').prop('disabled', true);
@@ -224,8 +224,12 @@ async function instruction2(file) {
 
 async function instruction3() {
   const ret = fetchJson(`${apiUrl()}/checklocations/`, {
-    method:'post',
-    body: JSON.stringify(getValidPoints)
+    method: 'post',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(getValidPoints())
   });
   console.log(ret);
 }

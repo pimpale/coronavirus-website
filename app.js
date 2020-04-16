@@ -59,6 +59,8 @@ function checkLocations(req, res) {
     timestamp: {$gte: loc.timestamp - 10e7, $lt: loc.timestamp},
   }));
 
+  console.log(locs);
+
   const results = db.collection('locations').find({$or: locs}, {
     projection: {
       _id: 0,
@@ -119,8 +121,9 @@ async function initialize() {
 
   app = express();
   // configure to use body parser
-  app.use(bodyParser.urlencoded({extended: false}));
-  app.use(bodyParser.json());
+  app.use(bodyParser.json({limit: '50mb'}));
+  app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+
   app.use(compression());
   // Add methods
   app.post('/api/uploadlocations/', [
@@ -128,11 +131,11 @@ async function initialize() {
     check('*.longitude', 'must be valid longitude in float form').isFloat(),
     check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
   ], uploadLocations);
-  app.get('/api/checklocations/', [
+  app.post('/api/checklocations/', [
     // Ensure user puts in all of the necessary values
-    check('*.latitude', 'must be valid latitude in float form').isFloat(),
-    check('*.longitude', 'must be valid longitude in float form').isFloat(),
-    check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
+    //check('*.latitude', 'must be valid latitude in float form').isFloat(),
+    //check('*.longitude', 'must be valid longitude in float form').isFloat(),
+    //check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
   ], checkLocations);
 
   // serve static files
