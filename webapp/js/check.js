@@ -1,16 +1,17 @@
 /* global moment sleep L apiUrl fetchJson */
 
-const globalMinTimestamp = moment('2020').valueOf();
-const globalMaxTimestamp = moment('2021').valueOf();
+const globalMinTimestamp = moment('2017-01-01').valueOf();
+const globalMaxTimestamp = moment().valueOf();
 
 // the map
-let map = null;
+let instruction2Map = null;
+let instruction3Map = null;
 
 // The {latitude, longitude, timestamp} groups
-let points = null;
+let instruction2Points = null;
 
-// list of all markers
-let markers = [];
+// list of all instruction2Markers
+let instruction2Markers = [];
 
 // the square areas created by the user
 let exclusionZones = [];
@@ -20,9 +21,9 @@ let maxTimestamp = globalMaxTimestamp;
 /**
  * loads the map
  */
-function loadmap() {
-  map = L.map('mapid');
-  map.setView([0, 0], 2);
+function loadInstruction2Map() {
+  instruction2Map = L.map('instruction2-map');
+  instruction2Map.setView([0, 0], 2);
 
   const osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
     attribution: ('Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
@@ -37,15 +38,15 @@ function loadmap() {
       'zZ3BiIn0.nLv4P71SFh4TIANuwJ8I9A',
   });
 
-  osm.addTo(map);
+  osm.addTo(instruction2Map);
 
-  const drawnItems = L.featureGroup().addTo(map);
+  const drawnItems = L.featureGroup().addTo(instruction2Map);
 
-  map.addControl(new L.Control.Draw({
+  instruction2Map.addControl(new L.Control.Draw({
     position: 'topright',
     edit: {
       featureGroup: drawnItems,
-      edit:false,
+      edit: false,
       poly: {
         allowIntersection: false,
       },
@@ -68,36 +69,116 @@ function loadmap() {
     })
   }
 
-  map.on(L.Draw.Event.CREATED, async function (event) {
-    if(!rendering) {
+  instruction2Map.on(L.Draw.Event.CREATED, async function (event) {
+    if (!rendering) {
       drawnItems.addLayer(event.layer);
       genExclusionZones();
-      await renderMap();
+      await renderInstruction2Map();
     }
   });
 
-  map.on(L.Draw.Event.DELETED, async function (event) {
-    if(!rendering) {
+  instruction2Map.on(L.Draw.Event.DELETED, async function (event) {
+    if (!rendering) {
       drawnItems.removeLayer(event.layer);
       genExclusionZones();
-      await renderMap();
+      await renderInstruction2Map();
     }
+  });
+
+  $('#instruction2-map-daterange').ionRangeSlider({
+    skin: 'round',
+    type: 'double',
+    grid: true,
+    min: minTimestamp,
+    max: maxTimestamp,
+    from: minTimestamp,
+    to: maxTimestamp,
+    prettify: (ts) => moment(ts).format('MMM D, YYYY'),
+    onFinish: async function () {
+      // retrieve the millisecond range permitted
+      minTimestamp = $('#instruction2-map-daterange').data('from')
+      maxTimestamp = $('#instruction2-map-daterange').data('to')
+      await renderInstruction2Map();
+    },
   });
 }
 
+function loadInstruction3Map() {
+  instruction3Map = L.map('instruction3-map');
+  instruction3Map.setView([0, 0], 2);
+
+  const osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: ('Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'),
+    maxZoom: 18,
+    minZoom: 2,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'pk.eyJ1IjoicGltcGFsZSIsImEiOiJjazhkbzk4NTIwdHkzM21vMWFiNHI' +
+      'zZ3BiIn0.nLv4P71SFh4TIANuwJ8I9A',
+  });
+
+  osm.addTo(instruction3Map);
+
+  const drawnItems = L.featureGroup().addTo(instruction3Map);
+
+  function genExclusionZones() {
+    exclusionZones = [];
+    drawnItems.eachLayer((l) => {
+      exclusionZones.push(l.getBounds());
+    })
+  }
+
+  instruction2Map.on(L.Draw.Event.CREATED, async function (event) {
+    if (!rendering) {
+      drawnItems.addLayer(event.layer);
+      genExclusionZones();
+      await renderInstruction2Map();
+    }
+  });
+
+  instruction2Map.on(L.Draw.Event.DELETED, async function (event) {
+    if (!rendering) {
+      drawnItems.removeLayer(event.layer);
+      genExclusionZones();
+      await renderInstruction2Map();
+    }
+  });
+
+  $('#instruction2-map-daterange').ionRangeSlider({
+    skin: 'round',
+    type: 'double',
+    grid: true,
+    min: minTimestamp,
+    max: maxTimestamp,
+    from: minTimestamp,
+    to: maxTimestamp,
+    prettify: (ts) => moment(ts).format('MMM D, YYYY'),
+    onFinish: async function () {
+      // retrieve the millisecond range permitted
+      minTimestamp = $('#instruction2-map-daterange').data('from')
+      maxTimestamp = $('#instruction2-map-daterange').data('to')
+      await renderInstruction2Map();
+    },
+  });
+}
+
+
 function addMarker(latlng, html) {
   let marker = new L.Marker(latlng);
-  map.addLayer(marker);
+  instruction2Map.addLayer(marker);
   if (html != null) {
     marker.bindPopup(html);
   }
-  markers.push(marker);
+  instruction2Markers.push(marker);
 }
 
 let rendering = false;
 
 function getValidPoints() {
-   return points
+  return instruction2Points
     .filter((x) => x.timestamp >= minTimestamp && x.timestamp < maxTimestamp)
     .filter((loc) => {
       for (const box of exclusionZones) {
@@ -110,20 +191,20 @@ function getValidPoints() {
 }
 
 /**
- * Renders the markers on the map, making sure to ignore areas that are covered
+ * Renders the instruction2Markers on the map, making sure to ignore areas that are covered
  * with a block. Also ignores the areas outside of the given time range Domain: [minT, maxT)
  */
-async function renderMap() {
+async function renderInstruction2Map() {
   rendering = true;
   // clean map
-  for (let i = 0; i < markers.length; i++) {
-    map.removeLayer(markers[i]);
+  for (let i = 0; i < instruction2Markers.length; i++) {
+    instruction2Map.removeLayer(instruction2Markers[i]);
   }
-  markers = [];
+  instruction2Markers = [];
 
-  $('#map-progress-div').show();
+  $('#instruction2-map-progress-div').show();
 
-  $('#map-daterange').data('ionRangeSlider').update({
+  $('#instruction2-map-daterange').data('ionRangeSlider').update({
     block: true,
   });
 
@@ -132,8 +213,8 @@ async function renderMap() {
   // get the length
   const renderable_points_length = renderable_points.length;
 
-  $('#instruction2-counter').html(`${(renderable_points_length/10e4).toFixed(2)}/10.00 Megabytes Used`)
-  if(renderable_points_length/10e4 < 10) {
+  $('#instruction2-counter').html(`${(renderable_points_length / 10e3).toFixed(2)}/10.00 Megabytes Used`)
+  if (renderable_points_length / 10e3 < 10) {
     $('#instruction2-confirm').prop('disabled', false);
   } else {
     $('#instruction2-confirm').prop('disabled', true);
@@ -154,16 +235,16 @@ async function renderMap() {
     }
 
     await sleep(1);
-    $('#map-progress').css('width', `${(i * 100.0) / renderable_points_length}%`);
+    $('#instruction2-map-progress').css('width', `${(i * 100.0) / renderable_points_length}%`);
     addMarker(latlng, moment(loc.timestamp).format('MMM D, hh:ss a'));
   }
 
-  $('#map-daterange').data('ionRangeSlider').update({
+  $('#instruction2-map-daterange').data('ionRangeSlider').update({
     block: false,
   });
 
-  $('#map-progress-div').hide();
-  $('#map-progress').css('width', '0%');
+  $('#instruction2-map-progress-div').hide();
+  $('#instruction2-map-progress').css('width', '0%');
   rendering = false;
 }
 
@@ -171,9 +252,6 @@ async function renderMap() {
  * Instruction step 0
  */
 async function instruction0() {
-  $('#mapdiv').hide();
-  $('#mapinfo-title').html('Map');
-  $('#mapinfo-subtext').html('Complete step 1 in order to load your data.');
   $('#instruction1-selectfile').prop('disabled', true);
   await instruction1();
 }
@@ -198,14 +276,13 @@ async function instruction1() {
  * we initialize the methods for the user to begin excluding data
  */
 async function instruction2(file) {
-  $('#mapinfo-title').html('Your Locations');
-  $('#instruction2-confirm').prop('disabled', false);
-  $('#mapinfo-subtext').html(`Use the slider below to select the date ranges
-    you want to check. Use the rectangle tool to block areas from the upload.
-    Note that your data must be under 10MB for upload.`);
+  loadInstruction2Map();
+
+  $('#instruction1-div').hide();
+  $('#instruction2-div').show();
 
   // corona didn't really get started till 2020
-  points = JSON.parse(await file.text()).locations
+  instruction2Points = JSON.parse(await file.text()).locations
     .filter((loc) => loc.timestampMs >= minTimestamp && loc.timestampMs < maxTimestamp)
     .map((loc) => ({
       latitude: loc.latitudeE7 * 10e-8,
@@ -213,49 +290,34 @@ async function instruction2(file) {
       timestamp: parseInt(loc.timestampMs),
     }));
 
-  $('#mapdiv').show();
+  await renderInstruction2Map();
 
-  await renderMap();
-
-  $('#instruction2-confirm').button().click(async function() {
-    await instruction3();
+  $('#instruction2-confirm').prop('disabled', false);
+  $('#instruction2-confirm').button().click(async function () {
+    $('#instruction2-wait').show();
+    const ret = await fetchJson(`${apiUrl()}/checklocations/`, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({locs: getValidPoints()})
+    });
+    $('#instruction2-wait').hide();
+    await instruction3(ret);
   })
 }
 
-async function instruction3() {
-  const ret = fetchJson(`${apiUrl()}/checklocations/`, {
-    method: 'post',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ locs: getValidPoints() })
-  });
-  console.log(ret);
-}
+/**
+ * Let the user be able to see their own exposures to coronavirus
+ */
+async function instruction3(checkedLocations) {
+  $('#instruction2-div').hide();
+  $('#instruction3-div').show();
 
-function loadslider() {
-  $('#map-daterange').ionRangeSlider({
-    skin: 'round',
-    type: 'double',
-    grid: true,
-    min: minTimestamp,
-    max: maxTimestamp,
-    from: minTimestamp,
-    to: maxTimestamp,
-    prettify: (ts) => moment(ts).format('MMM D, YYYY'),
-    onFinish: async function () {
-      // retrieve the millisecond range permitted
-      minTimestamp = $('#map-daterange').data('from')
-      maxTimestamp = $('#map-daterange').data('to')
-      await renderMap();
-    },
-  });
 }
 
 $(document).ready(async function () {
-  loadmap();
-  loadslider();
   // begin the process
   await instruction0();
 });

@@ -13,10 +13,10 @@ let app;
 
 function locToBox(loc) {
   return {
-    lat_min: loc.latitude - 0.1,
-    lat_max: loc.latitude + 0.1,
-    lng_min: loc.longitude - 0.1,
-    lng_max: loc.longitude + 0.1,
+    lat_min: loc.latitude - 0.0005, // ~100 meters
+    lat_max: loc.latitude + 0.0005,
+    lng_min: loc.longitude - 0.0005,
+    lng_max: loc.longitude + 0.0005,
     ts_min: loc.timestamp,
     ts_max: loc.timestamp + 10e7, // 27.7 hours after you leave
     true_lat: loc.latitude,
@@ -38,10 +38,18 @@ function uploadLocations(req, res) {
     return;
   }
 
+  // Make sure this isn't a duplicate entry
+  const already = db.prepare('SELECT email FROM uploads WHERE email = ?').all(req.body.email);
+  if(already.length > 0) {
+    res.status(409).json({errors: ['This resource already exists']});
+    return;
+  }
 
   const upload = db.transaction(function(locations, ip, email, infect_start) {
-    const upload_id = db.prepare('INSERT INTO uploads(id, ip, email, infect_start) VALUES(null, ?, ?, ?)').run(ip, email, infect_start);
-    const insertLocBox = db.prepare('INSERT INTO locations_cache' +
+    const upload_id = db.prepare('INSERT INTO uploads(id, ip, email, infect_start) VALUES(null, ?, ?, ?)')
+      .run(ip, email, infect_start)
+      .lastInsertRowid;
+    const insertLocBox = db.prepare('INSERT INTO locations' +
       '(id, lat_min, lat_max, lng_min, lng_max, ts_min, ts_max, true_lat, true_lng, true_ts, upload_id) ' +
       'VALUES(null, $lat_min, $lat_max, $lng_min, $lng_max, $ts_min, $ts_max, $true_lat, $true_lng, $true_ts, ?)');
     for (const loc of locations) {
@@ -52,7 +60,6 @@ function uploadLocations(req, res) {
     }
   });
 
-  // TODO what if no email or ip?
   upload(req.body.locs, req.ip, req.body.email, req.body.infect_start);
 
   res.end();
@@ -78,16 +85,14 @@ function checkLocations(req, res) {
   let intersections = [];
 
   const intersectingBoxes = db.prepare('SELECT l.true_lat, l.true_lng, l.true_ts, u.infect_start ' +
-    'FROM locations l INNER JOIN uploads u ON l.upload_id = u.id ' +
+    'FROM locations l LEFT JOIN uploads u ON l.upload_id = u.id ' +
     'WHERE l.lat_min < $latitude AND l.lat_max > $latitude ' +
     'AND l.lng_min < $longitude AND l.lng_max > $longitude ' +
     'AND l.ts_min < $timestamp AND l.ts_max > $timestamp');
   for(let i = 0; i < locs.length; i++) {
     const loc = locs[i];
-    for(const intersection of intersectingBoxes.all(loc)) {
-      intersection['contact'] = loc;
-      intersections.push(intersection);
-    }
+    loc['exposures'] = intersectingBoxes.all(loc);
+    intersections.push(loc);
   }
 
   res.send(intersections);
@@ -104,8 +109,8 @@ async function initialize() {
 
   app = express();
   // configure to use body parser
-  app.use(bodyParser.json({limit: '50mb'}));
-  app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+  app.use(bodyParser.json({limit: '10mb'}));
+  app.use(bodyParser.urlencoded({limit: '10mb', extended: true}));
 
   app.use(compression());
   // Add methods
