@@ -3,14 +3,27 @@
 'use strict';
 // Imports
 const express = require('express');
+const sqlite3 = require('better-sqlite3');
 const bodyParser = require('body-parser');
-const mongodb = require('mongodb');
 const compression = require('compression');
 const {check, validationResult} = require('express-validator');
 
-let client;
 let db;
 let app;
+
+function locToBox(loc) {
+  return {
+    lat_min: loc.latitude - 0.1,
+    lat_max: loc.latitude + 0.1,
+    lng_min: loc.longitude - 0.1,
+    lng_max: loc.longitude + 0.1,
+    ts_min: loc.timestamp,
+    ts_max: loc.timestamp + 10e7, // 27.7 hours after you leave
+    true_lat: loc.latitude,
+    true_lng: loc.longitude,
+    true_ts: loc.timestamp,
+  }
+}
 
 /**
  * Takes a post request, and loads the body into the mongodb
@@ -25,16 +38,23 @@ function uploadLocations(req, res) {
     return;
   }
 
-  db.collection('locations').insertMany(req.body.map((x) => ({
-    latitude: x.latitude,
-    longitude: x.longitude,
-    timestamp: x.timestamp,
-    ip: req.ip,
-  })), (err, _) => {
-    if (err) {
-      throw err;
+
+  const upload = db.transaction(function(locations, ip, email) {
+    const upload_id = db.prepare('INSERT INTO uploads(id, ip, email) VALUES(null, ?, ?)').run(ip, email);
+    const insertLocBox = db.prepare('INSERT INTO locations_cache' +
+      '(id, lat_min, lat_max, lng_min, lng_max, ts_min, ts_max, true_lat, true_lng, true_ts, upload_id) ' +
+      'VALUES(null, $lat_min, $lat_max, $lng_min, $lng_max, $ts_min, $ts_max, $true_lat, $true_lng, $true_ts, ?)');
+    for (const loc of locations) {
+      insertLocBox.run(
+        upload_id, // upload_id
+        locToBox(loc), // the data
+      );
     }
   });
+
+  // TODO what if no email or ip?
+  upload(req.body, req.ip, req.query.email);
+
   res.end();
 }
 
@@ -53,22 +73,24 @@ function checkLocations(req, res) {
     return;
   }
 
-  const locs = req.body.map((loc) => ({
-    latitude: {$gte: loc.latitude - 0.1, $lt: loc.latitude + 0.1},
-    longitude: {$gte: loc.longitude - 0.1, $lt: loc.longitude + 0.1},
-    timestamp: {$gte: loc.timestamp - 10e7, $lt: loc.timestamp},
-  }));
+  // intersections is a Map<timestamp, Array of intersections>
+  const locs = req.body;
+  let intersections = [];
 
-  console.log(locs);
+  const intersectingBoxes = db.prepare('SELECT l.true_lat, l.true_lng, l.true_ts, u.infect_start ' +
+    'FROM locations l INNER JOIN uploads u ON l.upload_id = u.id ' +
+    'WHERE l.lat_min < $latitude AND l.lat_max > $latitude ' +
+    'AND l.lng_min < $longitude AND l.lng_max > $longitude ' +
+    'AND l.ts_min < $timestamp AND l.ts_max > $timestamp');
+  for(let i = 0; i < locs.length; i++) {
+    const loc = locs[i];
+    for(const intersection of intersectingBoxes.all(loc)) {
+      intersection['contact'] = loc;
+      intersections.push(intersection);
+    }
+  }
 
-  const results = db.collection('locations').find({$or: locs}, {
-    projection: {
-      _id: 0,
-      ip: 0,
-    },
-  }).toArray();
-
-  res.send(results);
+  res.send(intersections);
   res.end();
 }
 
@@ -78,46 +100,7 @@ function checkLocations(req, res) {
  */
 async function initialize() {
   // Initialize mongodb connection
-  client = await mongodb.MongoClient.connect(`mongodb://localhost`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  db = client.db('test');
-
-  // If we haven't initialized a collection, do so now
-  if (!await db.listCollections({name: 'locations'}).hasNext()) {
-    await db.createCollection('locations', {
-      validator: {
-        $jsonSchema: {
-          bsonType: 'object',
-          required: ['latlng', 'longitude', 'timestamp', 'ip'],
-          properties: {
-            latitude: {
-              bsonType: 'double',
-              description: 'the latitude of this point',
-            },
-            longitude: {
-              bsonType: 'double',
-              description: 'the longitude of this point',
-            },
-            timestamp: {
-              bsonType: 'long',
-              description: 'the milliseconds since 1970 of this point',
-            },
-            ip: {
-              bsonType: 'string',
-              description: 'ip address of the submitter',
-            },
-          },
-        },
-      },
-    });
-    await db.collection('locations').createIndex({
-      latitude: 1,
-      longitude: 1,
-      timestamp: 1,
-    });
-  }
+  db = new sqlite3.Database('./database.sqlite3');
 
   app = express();
   // configure to use body parser
@@ -133,9 +116,9 @@ async function initialize() {
   ], uploadLocations);
   app.post('/api/checklocations/', [
     // Ensure user puts in all of the necessary values
-    //check('*.latitude', 'must be valid latitude in float form').isFloat(),
-    //check('*.longitude', 'must be valid longitude in float form').isFloat(),
-    //check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
+    check('*.latitude', 'must be valid latitude in float form').isFloat(),
+    check('*.longitude', 'must be valid longitude in float form').isFloat(),
+    check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
   ], checkLocations);
 
   // serve static files
@@ -148,6 +131,7 @@ async function initialize() {
 async function main() {
   await initialize();
   app.listen(8080, () => console.log(`App started successfully!`));
+  db.close();
 }
 
 main();
