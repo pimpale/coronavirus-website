@@ -1,7 +1,7 @@
 /* global moment sleep L apiUrl fetchJson */
 
-const globalMinTimestamp = moment('2017').valueOf();
-const globalMaxTimestamp = moment('2018').valueOf();
+const globalMinTimestamp = moment('2020').valueOf();
+const globalMaxTimestamp = moment('2021').valueOf();
 
 // the map
 let map = null;
@@ -229,7 +229,7 @@ async function instruction3() {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(getValidPoints())
+    body: JSON.stringify({ locs: getValidPoints() })
   });
   console.log(ret);
 }

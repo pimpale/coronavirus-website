@@ -39,8 +39,8 @@ function uploadLocations(req, res) {
   }
 
 
-  const upload = db.transaction(function(locations, ip, email) {
-    const upload_id = db.prepare('INSERT INTO uploads(id, ip, email) VALUES(null, ?, ?)').run(ip, email);
+  const upload = db.transaction(function(locations, ip, email, infect_start) {
+    const upload_id = db.prepare('INSERT INTO uploads(id, ip, email, infect_start) VALUES(null, ?, ?, ?)').run(ip, email, infect_start);
     const insertLocBox = db.prepare('INSERT INTO locations_cache' +
       '(id, lat_min, lat_max, lng_min, lng_max, ts_min, ts_max, true_lat, true_lng, true_ts, upload_id) ' +
       'VALUES(null, $lat_min, $lat_max, $lng_min, $lng_max, $ts_min, $ts_max, $true_lat, $true_lng, $true_ts, ?)');
@@ -53,7 +53,7 @@ function uploadLocations(req, res) {
   });
 
   // TODO what if no email or ip?
-  upload(req.body, req.ip, req.query.email);
+  upload(req.body.locs, req.ip, req.body.email, req.body.infect_start);
 
   res.end();
 }
@@ -74,7 +74,7 @@ function checkLocations(req, res) {
   }
 
   // intersections is a Map<timestamp, Array of intersections>
-  const locs = req.body;
+  const locs = req.body.locs;
   let intersections = [];
 
   const intersectingBoxes = db.prepare('SELECT l.true_lat, l.true_lng, l.true_ts, u.infect_start ' +
@@ -100,7 +100,7 @@ function checkLocations(req, res) {
  */
 async function initialize() {
   // Initialize mongodb connection
-  db = new sqlite3.Database('./database.sqlite3');
+  db = new sqlite3('./database.sqlite3');
 
   app = express();
   // configure to use body parser
@@ -110,15 +110,17 @@ async function initialize() {
   app.use(compression());
   // Add methods
   app.post('/api/uploadlocations/', [
-    check('*.latitude', 'must be valid latitude in float form').isFloat(),
-    check('*.longitude', 'must be valid longitude in float form').isFloat(),
-    check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
+    check('locs.*.latitude', 'must be valid latitude in float form').isFloat(),
+    check('locs.*.longitude', 'must be valid longitude in float form').isFloat(),
+    check('locs.*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
+    check('infect_start').isInt(),
+    check('email').isEmail(),
   ], uploadLocations);
   app.post('/api/checklocations/', [
     // Ensure user puts in all of the necessary values
-    check('*.latitude', 'must be valid latitude in float form').isFloat(),
-    check('*.longitude', 'must be valid longitude in float form').isFloat(),
-    check('*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
+    check('locs.*.latitude', 'must be valid latitude in float form').isFloat(),
+    check('locs.*.longitude', 'must be valid longitude in float form').isFloat(),
+    check('locs.*.timestamp', 'must be valid timestamp in ms since 1970').isInt(),
   ], checkLocations);
 
   // serve static files
@@ -131,7 +133,6 @@ async function initialize() {
 async function main() {
   await initialize();
   app.listen(8080, () => console.log(`App started successfully!`));
-  db.close();
 }
 
 main();
