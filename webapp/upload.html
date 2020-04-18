@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!--Background Information -->
+  <title>Innexgo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Exo&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet">
+
+
+  <!-- CSS References -->
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="vendor/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="vendor/ion-rangeslider/css/ion.rangeSlider.min.css">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/headerfix-dark.css">
+  <link rel="stylesheet" href="css/homepage.css">
+  <link rel="stylesheet" href="css/sidebar.css">
+
+  <!-- JS References -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.js"></script>
+  <script src="vendor/ion-rangeslider/js/ion.rangeSlider.min.js"></script>
+  <script src="vendor/popper/js/popper.min.js"></script>
+  <script src="vendor/moment/moment.min.js"></script>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/upload.js"></script>
+
+  <!-- Favicon -->
+  <link rel='icon' href='img/icon.png' type='image/png' />
+
+</head>
+
+<body class="palette-level-one">
+  <header class="header">
+    <nav class="bg-dark navbar navbar-expand-lg fixed-top py-3">
+      <div class="container"><a href="index.html" class="navbar-brand font-weight-bold">Coronavirus Check</a>
+        <button type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
+          class="navbar-toggler navbar-toggler-right"><i class="fa fa-bars"></i></button>
+        <div id="navbarSupportedContent" class="collapse navbar-collapse">
+          <div class="navbar-nav ml-auto">
+            <a href="about.html" class="nav-item nav-link font-weight-bold">About</a>
+            <a href="faq.html" class="nav-item nav-link font-weight-bold">FAQ</a>
+            <a href="check.html" class="nav-item nav-link font-weight-bold">Check Exposure</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Sidebar -->
+  <nav id="sidebar" class="text-light bg-dark sidebar-fixed">
+    <div class="mx-3 my-5 py-5">
+      <!-- Instructions -->
+      <h3 class="text-light">Instructions</h3>
+      <!-- Upload -->
+      <div class="card bg-dark my-3">
+        <div class="card-body">
+          <h6 class="card-title text-light">About this app</h6>
+          <p class="card-text">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ornare tellus mauris, non pellentesque magna
+            lacinia ac. Ut semper rhoncus ligula eget sodales. Sed lectus risus, vehicula a porta nec, sollicitudin eu
+            leo. Proin viverra nisl vel quam feugiat aliquet. Pellentesque rutrum ligula ac urna sollicitudin, sed
+            ornare nulla ornare. Pellentesque risus augue, egestas eu placerat quis, euismod nec ipsum. Donec et
+            malesuada magna, consequat condimentum sem. Fusce in consectetur dui. Maecenas ornare quis turpis sed
+            finibus.
+
+            Mauris scelerisque neque pretium, ornare erat ac, lacinia nisi. Donec pharetra, ipsum semper tempor
+            placerat, ante ex sagittis justo, at interdum justo dolor nec mi. Etiam nunc mi, elementum faucibus mi at,
+            ultricies convallis nisi. Mauris nec sollicitudin risus. Morbi ornare, lorem a porta pulvinar, turpis metus
+            ultricies ipsum, vel venenatis urna ligula ullamcorper leo. Nullam condimentum commodo risus. In euismod
+            tortor arcu, eu mattis felis fermentum in. Fusce tristique est id risus pharetra efficitur. Proin pharetra,
+            purus vel porttitor varius, justo orci vulputate velit, at vestibulum arcu mauris non turpis. Integer
+            sollicitudin faucibus mi, posuere mollis magna. Aliquam ac magna nisi.
+          </p>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Content -->
+
+  <!-- Center Screen -->
+  <div id="not-sidebar" class="container-fluid">
+    <div class="px-3 my-5 py-5">
+      <div id="alert-zone"></div>
+        <!-- Instruction 1 -->
+      <div class="card-deck" id="instruction1-div">
+        <div class="card col-sm-10">
+          <div class="card-body">
+            <div class="input-group">
+              <h5 class="card-title text-center">1.Choose File</h5>
+            </div>
+            <p class="card-text">
+              Visit <a href="https://takeout.google.com/settings/takeout">Google Takeout</a> to download
+              your location history. You can speed up your download by clicking the "Deselect All"
+              button, and then reselecting "Location History". Make sure to click on the "Multiple Formats"
+              button to ensure your data will be in JSON format. Google will email you a file containing your
+              data. From this file, upload <code>Location History.json</code>. Then, click select.
+            </p>
+            <form>
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="customFile">
+                <label class="custom-file-label" for="customFile">Choose file</label>
+              </div>
+            </form>
+
+            <script>
+              // Add the following code if you want the name of the file appear on select
+              $(".custom-file-input").on("change", function () {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+              });
+            </script>
+            <button class="btn my-1 btn-primary" id="instruction1-selectfile">Select</button>
+          </div>
+        </div>
+      </div>
+        <!-- Instruction 2 -->
+      <div class="card-deck" id="instruction2-div" style="display:none;">
+        <div class="card col-sm-10">
+          <div class="card-body">
+            <div class="input-group">
+              <h5 class="card-title text-center">2. Select Locations</h5>
+            </div>
+            <p class="card-text">
+              Use the slider below to select the date ranges
+              you want to check. Use the rectangle tool to block areas from the upload.
+              Please ensure you block sensitive information that you would not want others to know. (Home, workplace, etc.)
+              This data is not saved on our servers.
+              Note that your data must be under 10MB for upload.
+            </p>
+            <input type="text" id="instruction2-map-daterange"></input>
+            <div id="instruction2-map" class="my-3" style="height:50vh;"></div>
+            <div class="progress" id="instruction2-map-progress-div" style="height: 20px;display:none;">
+              <div class="progress-bar" id="instruction2-map-progress" role="progressbar">Building Index...</div>
+            </div>
+            <button class="btn my-1 btn-primary float-left" id="instruction2-confirm">Upload Data</button>
+            <h6 class="float-right" id="instruction2-counter">0/10.00 Megabytes Used</h6>
+            <div id="instruction2-wait" style="display:none;">
+              <div class="spinner-border mx-1" role="status" aria-hidden="true"></div>
+              <h6>Processing Data</h6>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</body>
+
+</html>
