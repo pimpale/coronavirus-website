@@ -1,6 +1,6 @@
 /* global moment sleep L apiUrl fetchJson */
 
-const globalMinTimestamp = moment('2017-01-01').valueOf();
+const globalMinTimestamp = moment('2020-01-01').valueOf();
 const globalMaxTimestamp = moment().valueOf();
 
 // the map
@@ -123,7 +123,7 @@ function loadInstruction3Map() {
 }
 
 
-function addInstruction2Marker(latlng, html) {
+function addInstruction2Marker(latlng, icon, html) {
   let marker = new L.Marker(latlng);
   instruction2Map.addLayer(marker);
   if (html != null) {
@@ -183,7 +183,7 @@ async function renderInstruction2Map() {
     let loc = renderable_points[i]
     const latlng = [loc.latitude, loc.longitude]
     if (lastlatlng != null) {
-      if (Math.hypot(latlng[0] - lastlatlng[0], latlng[1] - lastlatlng[1]) < 0.01) {
+      if (Math.hypot(latlng[0] - lastlatlng[0], latlng[1] - lastlatlng[1]) < 0.001) {
         continue;
       }
       lastlatlng = latlng;
@@ -265,12 +265,28 @@ async function instruction2(file) {
   })
 }
 
+function addInstruction3Marker(latlng, icon, html) {
+  let marker = new L.Marker(latlng, {icon: icon});
+  instruction3Map.addLayer(marker);
+  if (html != null) {
+    marker.bindPopup(html);
+  }
+}
+
+
+
 /**
  * Let the user be able to see their own exposures to coronavirus
  */
 async function instruction3(checkedLocations) {
+  loadInstruction3Map();
+
   $('#instruction2-div').hide();
   $('#instruction3-div').show();
+
+  for(let i = 0; i < checkedLocations.length; i++) {
+    
+  }
 
 }
 
