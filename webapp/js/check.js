@@ -1,4 +1,4 @@
-/* global moment sleep L apiUrl fetchJson */
+/* global moment sleep L apiUrl fetchJson blueIcon violetIcon*/
 
 const globalMinTimestamp = moment('2020-01-01').valueOf();
 const globalMaxTimestamp = moment().valueOf();
@@ -273,8 +273,6 @@ function addInstruction3Marker(latlng, icon, html) {
   }
 }
 
-
-
 /**
  * Let the user be able to see their own exposures to coronavirus
  */
@@ -284,10 +282,18 @@ async function instruction3(checkedLocations) {
   $('#instruction2-div').hide();
   $('#instruction3-div').show();
 
-  for(let i = 0; i < checkedLocations.length; i++) {
-    
+  for (let i = 0; i < checkedLocations.length; i++) {
+    const intersection = checkedLocations[i];
+    addInstruction3Marker([intersection.latitude, intersection.longitude],
+      blueIcon, moment(intersection.timestamp).format('MMM D, hh:ss a'));
+    await sleep(10);
+    for (let e = 0; e < intersection.exposures.length; e++) {
+      const exposure = intersection.exposures[e];
+      addInstruction3Marker([exposure.true_lat, exposure.true_lng],
+        violetIcon, moment(exposure.true_ts).format('MMM D, hh:ss a'));
+      await sleep(1);
+    }
   }
-
 }
 
 $(document).ready(async function () {

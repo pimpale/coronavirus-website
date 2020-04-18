@@ -100,7 +100,7 @@ function checkLocations(req, res) {
 }
 
 /**
- * Initializes the mongodb database, creating collections if they don't
+ * Initializes the sqlite3 database
  * already exist also initializes express
  */
 async function initialize() {

@@ -30,6 +30,7 @@
   <script src="vendor/moment/moment.min.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="vendor/leaflet-draw/leaflet.draw.js"></script>
+  <script src="vendor/leaflet-color-markers/js/leaflet-color-markers.js"></script>
   <script src="js/common.js"></script>
   <script src="js/check.js"></script>
 
@@ -158,12 +159,11 @@
               <h5 class="card-title text-center">View Results</h5>
             </div>
             <p class="card-text">View potential exposures to coronavirus.</p>
-            <div id="mapid" class="my-3" style="height:50vh;"></div>
-            <div class="progress" id="map-progress-div" style="height: 30px;display:none;">
-              <div class="progress-bar" id="map-progress" role="progressbar">Building Index...</div>
+            <div id="instruction3-map" class="my-3" style="height:50vh;"></div>
+            <div class="progress" id="instruction3-progress-div" style="height: 30px;display:none;">
+              <div class="progress-bar" id="instruction3-progress" role="progressbar">Building Index...</div>
             </div>
             <button class="btn my-1 btn-primary float-left" id="instruction3-confirm">Upload Data</button>
-            <h6 class="float-right" id="instruction3-counter">0/10.00 Megabytes Used</h6>
           </div>
         </div>
       </div>
