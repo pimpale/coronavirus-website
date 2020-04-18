@@ -119,54 +119,11 @@ function loadInstruction3Map() {
     accessToken: 'pk.eyJ1IjoicGltcGFsZSIsImEiOiJjazhkbzk4NTIwdHkzM21vMWFiNHI' +
       'zZ3BiIn0.nLv4P71SFh4TIANuwJ8I9A',
   });
-
   osm.addTo(instruction3Map);
-
-  const drawnItems = L.featureGroup().addTo(instruction3Map);
-
-  function genExclusionZones() {
-    exclusionZones = [];
-    drawnItems.eachLayer((l) => {
-      exclusionZones.push(l.getBounds());
-    })
-  }
-
-  instruction2Map.on(L.Draw.Event.CREATED, async function (event) {
-    if (!rendering) {
-      drawnItems.addLayer(event.layer);
-      genExclusionZones();
-      await renderInstruction2Map();
-    }
-  });
-
-  instruction2Map.on(L.Draw.Event.DELETED, async function (event) {
-    if (!rendering) {
-      drawnItems.removeLayer(event.layer);
-      genExclusionZones();
-      await renderInstruction2Map();
-    }
-  });
-
-  $('#instruction2-map-daterange').ionRangeSlider({
-    skin: 'round',
-    type: 'double',
-    grid: true,
-    min: minTimestamp,
-    max: maxTimestamp,
-    from: minTimestamp,
-    to: maxTimestamp,
-    prettify: (ts) => moment(ts).format('MMM D, YYYY'),
-    onFinish: async function () {
-      // retrieve the millisecond range permitted
-      minTimestamp = $('#instruction2-map-daterange').data('from')
-      maxTimestamp = $('#instruction2-map-daterange').data('to')
-      await renderInstruction2Map();
-    },
-  });
 }
 
 
-function addMarker(latlng, html) {
+function addInstruction2Marker(latlng, html) {
   let marker = new L.Marker(latlng);
   instruction2Map.addLayer(marker);
   if (html != null) {
@@ -236,7 +193,7 @@ async function renderInstruction2Map() {
 
     await sleep(1);
     $('#instruction2-map-progress').css('width', `${(i * 100.0) / renderable_points_length}%`);
-    addMarker(latlng, moment(loc.timestamp).format('MMM D, hh:ss a'));
+    addInstruction2Marker(latlng, moment(loc.timestamp).format('MMM D, hh:ss a'));
   }
 
   $('#instruction2-map-daterange').data('ionRangeSlider').update({
