@@ -103,26 +103,6 @@ function loadInstruction2Map() {
   });
 }
 
-function loadInstruction3Map() {
-  instruction3Map = L.map('instruction3-map');
-  instruction3Map.setView([0, 0], 2);
-
-  const osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-    attribution: ('Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'),
-    maxZoom: 18,
-    minZoom: 2,
-    id: 'mapbox/streets-v11',
-    tileSize: 512,
-    zoomOffset: -1,
-    accessToken: 'pk.eyJ1IjoicGltcGFsZSIsImEiOiJjazhkbzk4NTIwdHkzM21vMWFiNHI' +
-      'zZ3BiIn0.nLv4P71SFh4TIANuwJ8I9A',
-  });
-  osm.addTo(instruction3Map);
-}
-
-
 function addInstruction2Marker(latlng, icon, html) {
   let marker = new L.Marker(latlng);
   instruction2Map.addLayer(marker);
@@ -229,6 +209,7 @@ async function instruction1() {
   });
 }
 
+
 /**
  * we initialize the methods for the user to begin excluding data
  */
@@ -262,38 +243,79 @@ async function instruction2(file) {
     });
     $('#instruction2-wait').hide();
     await instruction3(ret);
-  })
+  });
 }
 
-function addInstruction3Marker(latlng, icon, html) {
-  let marker = new L.Marker(latlng, {icon: icon});
-  instruction3Map.addLayer(marker);
-  if (html != null) {
-    marker.bindPopup(html);
+let instruction3MarkerDependents = [];
+
+function loadInstruction3Map(intersections) {
+  instruction3Map = L.map('instruction3-map');
+  instruction3Map.setView([0, 0], 2);
+
+  const osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: ('Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'),
+    maxZoom: 18,
+    minZoom: 2,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'pk.eyJ1IjoicGltcGFsZSIsImEiOiJjazhkbzk4NTIwdHkzM21vMWFiNHI' +
+      'zZ3BiIn0.nLv4P71SFh4TIANuwJ8I9A',
+  });
+  osm.addTo(instruction3Map);
+
+
+  const rootMarkersLayer = L.featureGroup().addTo(instruction3Map);
+  const dependentMarkersLayer = L.featureGroup().addTo(instruction3Map);
+
+  for(const intersection of intersections) {
+    let marker = new L.Marker([intersection.latitude, intersection.longitude]);
+    marker['original_data'] = intersection;
+    marker.bindPopup(moment(intersection.timestamp).format('MMM D, hh:ss a'));
+    marker.addTo(rootMarkersLayer);
   }
+
+  rootMarkersLayer.on('click', function(event) {
+    // Erase old dependent layers
+    for(let i = 0; i < instruction3MarkerDependents.length; i++) {
+      let elem= instruction3MarkerDependents[i];
+      dependentMarkersLayer.removeLayer(elem);
+    }
+    instruction3MarkerDependents = [];
+
+    // Get the data
+    const marker = event.layer;
+    const intersection = marker.original_data;
+
+    // Center view
+    instruction3Map.setView(marker.getLatLng(),17);
+
+    // Push new dependent layers and lines
+    for(const e of intersection.exposures) {
+      let emarker = new  L.Marker([e.latitude, e.longitude], {icon: violetIcon});
+      let eline = new L.Polyline([
+        [e.latitude, e.longitude],
+        [intersection.latitude, intersection.longitude]
+      ]);
+      emarker.addTo(dependentMarkersLayer);
+      eline.addTo(dependentMarkersLayer);
+      instruction3MarkerDependents.push(emarker);
+      instruction3MarkerDependents.push(eline);
+    }
+  });
 }
+
 
 /**
  * Let the user be able to see their own exposures to coronavirus
  */
 async function instruction3(checkedLocations) {
-  loadInstruction3Map();
+  loadInstruction3Map(checkedLocations);
 
   $('#instruction2-div').hide();
   $('#instruction3-div').show();
-
-  for (let i = 0; i < checkedLocations.length; i++) {
-    const intersection = checkedLocations[i];
-    addInstruction3Marker([intersection.latitude, intersection.longitude],
-      blueIcon, moment(intersection.timestamp).format('MMM D, hh:ss a'));
-    await sleep(10);
-    for (let e = 0; e < intersection.exposures.length; e++) {
-      const exposure = intersection.exposures[e];
-      addInstruction3Marker([exposure.true_lat, exposure.true_lng],
-        violetIcon, moment(exposure.true_ts).format('MMM D, hh:ss a'));
-      await sleep(1);
-    }
-  }
 }
 
 $(document).ready(async function () {

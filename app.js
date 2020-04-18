@@ -91,8 +91,15 @@ function checkLocations(req, res) {
     'AND l.ts_min < $timestamp AND l.ts_max > $timestamp');
   for(let i = 0; i < locs.length; i++) {
     const loc = locs[i];
-    loc['exposures'] = intersectingBoxes.all(loc);
-    intersections.push(loc);
+    loc['exposures'] = intersectingBoxes.all(loc).map((e) => ({
+      latitude: e.true_lat,
+      longitude: e.true_lng,
+      timestamp: e.true_ts,
+      infect_start: e.infect_start,
+    }));
+    if(loc.exposures.length != 0) {
+      intersections.push(loc);
+    }
   }
 
   res.send(intersections);

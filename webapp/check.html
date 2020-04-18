@@ -135,6 +135,8 @@
             <p class="card-text">
               Use the slider below to select the date ranges
               you want to check. Use the rectangle tool to block areas from the upload.
+              Please ensure you block sensitive information that you would not want others to know. (Home, workplace, etc.)
+              This data is not saved on our servers.
               Note that your data must be under 10MB for upload.
             </p>
             <input type="text" id="instruction2-map-daterange"></input>
@@ -158,12 +160,15 @@
             <div class="input-group">
               <h5 class="card-title text-center">View Results</h5>
             </div>
-            <p class="card-text">View potential exposures to coronavirus.</p>
+            <p class="card-text">
+              View potential exposures to coronavirus.
+              Note: if you feel you may have coronavirus yourself, please consider anonymously uploading your location data.
+              <a href="upload.html">
+            </p>
             <div id="instruction3-map" class="my-3" style="height:50vh;"></div>
             <div class="progress" id="instruction3-progress-div" style="height: 30px;display:none;">
               <div class="progress-bar" id="instruction3-progress" role="progressbar">Building Index...</div>
             </div>
-            <button class="btn my-1 btn-primary float-left" id="instruction3-confirm">Upload Data</button>
           </div>
         </div>
       </div>
