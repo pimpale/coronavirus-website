@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="vendor/ion-rangeslider/css/ion.rangeSlider.min.css">
   <link rel="stylesheet" href="vendor/daterangepicker/daterangepicker.css">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="vendor/leaflet-draw/leaflet.draw.css">
   <link rel="stylesheet" href="css/headerfix-dark.css">
   <link rel="stylesheet" href="css/homepage.css">
   <link rel="stylesheet" href="css/sidebar.css">
@@ -29,6 +30,7 @@
   <script src="vendor/popper/js/popper.min.js"></script>
   <script src="vendor/moment/moment.min.js"></script>
   <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/leaflet-draw/leaflet.draw.js"></script>
   <script src="vendor/daterangepicker/daterangepicker.js"></script>
   <script src="js/common.js"></script>
   <script src="js/upload.js"></script>
@@ -155,7 +157,7 @@
       </div>
 
       <!-- Instruction 2 -->
-      <div class="card-deck d-none" id="instruction2-div">
+      <div class="card-deck" id="instruction2-div" style="display:none;">
         <div class="card col-sm-10">
           <div class="card-body">
             <div class="input-group">
@@ -171,14 +173,13 @@
               Your data will not be sold or used for any purpose but contact tracing.
               Note that your data must be under 10MB for upload.
             </p>
-            <input type="text" id="instruction2-map-daterange"></input>
             <div id="instruction2-map" class="my-3" style="height:50vh;"></div>
-            <div class="progress d-none" id="instruction2-map-progress-div">
+            <div class="progress" id="instruction2-map-progress-div" style="display:none;">
               <div class="progress-bar" id="instruction2-map-progress" role="progressbar">Building Index...</div>
             </div>
             <button class="btn my-1 btn-primary float-left" id="instruction2-confirm">Upload Data</button>
             <h6 class="float-right" id="instruction2-counter">0/10.00 Megabytes Used</h6>
-            <div id="instruction2-wait" class="d-none">
+            <div id="instruction2-wait" style="display:none;">
               <div class="spinner-border mx-1" role="status" aria-hidden="true"></div>
               <h6>Processing Data</h6>
             </div>

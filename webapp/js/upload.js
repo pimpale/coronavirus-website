@@ -1,7 +1,5 @@
 /* global moment sleep L apiUrl fetchJson blueIcon violetIcon*/
 
-
-
 // the map
 let instruction2Map = null;
 
@@ -118,10 +116,6 @@ async function renderInstruction2Map() {
 
   $('#instruction2-map-progress-div').show();
 
-  $('#instruction2-map-daterange').data('ionRangeSlider').update({
-    block: true,
-  });
-
   // Calculate the points that fit within these places
   const renderable_points = getValidPoints();
   // get the length
@@ -152,10 +146,6 @@ async function renderInstruction2Map() {
     $('#instruction2-map-progress').css('width', `${(i * 100.0) / renderable_points_length}%`);
     addInstruction2Marker(latlng, moment(loc.timestamp).format('MMM D, hh:ss a'));
   }
-
-  $('#instruction2-map-daterange').data('ionRangeSlider').update({
-    block: false,
-  });
 
   $('#instruction2-map-progress-div').hide();
   $('#instruction2-map-progress').css('width', '0%');
@@ -276,17 +266,22 @@ async function instruction1() {
   $('#instruction1-confirm').button().click(async function () {
     $('#instruction1-confirm').prop('disabled', true);
 
-    const points = JSON.parse(await file.text()).locations
-      .filter((loc) => loc.timestampMs >= minTimestamp && loc.timestampMs < maxTimestamp)
+    // 14 days before symptoms
+    const day = 24*60*60*1000
+    const infect_start = mindate - 14*day;
+
+    // Whichever comes last: 10 days after the start date or 3 days after the end of symptoms
+    const infect_end = Math.max(mindate + 10*day, maxdate + 3*day);
+
+    instruction2Points = JSON.parse(await file.text()).locations
+      .filter((loc) => loc.timestampMs >= infect_start && loc.timestampMs < infect_end)
       .map((loc) => ({
         latitude: loc.latitudeE7 * 10e-8,
         longitude: loc.longitudeE7 * 10e-8,
         timestamp: parseInt(loc.timestampMs),
       }));
 
-
-
-    await instruction2(points, email, mindate, maxdate);
+    await instruction2(email, infect_start);
   });
 }
 
@@ -294,7 +289,7 @@ async function instruction1() {
 /**
  * we initialize the methods for the user to begin excluding data
  */
-async function instruction2(locs, email, infect_start) {
+async function instruction2(email, infect_start) {
   loadInstruction2Map();
 
   $('#instruction1-div').hide();
