@@ -213,7 +213,7 @@ async function instruction1() {
 /**
  * we initialize the methods for the user to begin excluding data
  */
-async function instruction2(file) {
+async function instruction2(file, email, infect_start) {
   loadInstruction2Map();
 
   $('#instruction1-div').hide();
@@ -233,90 +233,33 @@ async function instruction2(file) {
   $('#instruction2-confirm').prop('disabled', false);
   $('#instruction2-confirm').button().click(async function () {
     $('#instruction2-wait').show();
-    const ret = await fetchJson(`${apiUrl()}/checklocations/`, {
-      method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({locs: getValidPoints()})
-    });
-    $('#instruction2-wait').hide();
-    await instruction3(ret);
-  });
-}
-
-let instruction3MarkerDependents = [];
-
-function loadInstruction3Map(intersections) {
-  instruction3Map = L.map('instruction3-map');
-  instruction3Map.setView([0, 0], 2);
-
-  const osm = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-    attribution: ('Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
-      '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
-      'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>'),
-    maxZoom: 18,
-    minZoom: 2,
-    id: 'mapbox/streets-v11',
-    tileSize: 512,
-    zoomOffset: -1,
-    accessToken: 'pk.eyJ1IjoicGltcGFsZSIsImEiOiJjazhkbzk4NTIwdHkzM21vMWFiNHI' +
-      'zZ3BiIn0.nLv4P71SFh4TIANuwJ8I9A',
-  });
-  osm.addTo(instruction3Map);
-
-
-  const rootMarkersLayer = L.featureGroup().addTo(instruction3Map);
-  const dependentMarkersLayer = L.featureGroup().addTo(instruction3Map);
-
-  for(const intersection of intersections) {
-    let marker = new L.Marker([intersection.latitude, intersection.longitude]);
-    marker['original_data'] = intersection;
-    marker.bindPopup(moment(intersection.timestamp).format('MMM D, hh:ss a'));
-    marker.addTo(rootMarkersLayer);
-  }
-
-  rootMarkersLayer.on('click', function(event) {
-    // Erase old dependent layers
-    for(let i = 0; i < instruction3MarkerDependents.length; i++) {
-      let elem= instruction3MarkerDependents[i];
-      dependentMarkersLayer.removeLayer(elem);
-    }
-    instruction3MarkerDependents = [];
-
-    // Get the data
-    const marker = event.layer;
-    const intersection = marker.original_data;
-
-    // Center view
-    instruction3Map.setView(marker.getLatLng(),17);
-
-    // Push new dependent layers and lines
-    for(const e of intersection.exposures) {
-      let emarker = new  L.Marker([e.latitude, e.longitude], {icon: violetIcon});
-      let eline = new L.Polyline([
-        [e.latitude, e.longitude],
-        [intersection.latitude, intersection.longitude]
-      ]);
-      emarker.addTo(dependentMarkersLayer);
-      eline.addTo(dependentMarkersLayer);
-      instruction3MarkerDependents.push(emarker);
-      instruction3MarkerDependents.push(eline);
+    try {
+      const ret = await fetchJson(`${apiUrl()}/uploadlocations/`, {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          infect_start: infect_start,
+          locs: getValidPoints(),
+        })
+      });
+      $('#instruction2-wait').hide();
+      $('#instruction2-success').show();
+    } catch (e) {
+      // TODO pls handle error
     }
   });
 }
 
+// Add the following code if you want the name of the file appear on select
+$(".custom-file-input").on("change", function () {
+  var fileName = $(this).val().split("\\").pop();
+  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+});
 
-/**
- * Let the user be able to see their own exposures to coronavirus
- */
-async function instruction3(checkedLocations) {
-  loadInstruction3Map(checkedLocations);
-
-  $('#instruction2-div').hide();
-  $('#instruction3-div').show();
-}
 
 $(document).ready(async function () {
   // begin the process
