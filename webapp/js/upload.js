@@ -1,11 +1,9 @@
 /* global moment sleep L apiUrl fetchJson blueIcon violetIcon*/
 
-const globalMinTimestamp = moment('2020-01-01').valueOf();
-const globalMaxTimestamp = moment().valueOf();
+
 
 // the map
 let instruction2Map = null;
-let instruction3Map = null;
 
 // The {latitude, longitude, timestamp} groups
 let instruction2Points = null;
@@ -13,10 +11,7 @@ let instruction2Points = null;
 // list of all instruction2Markers
 let instruction2Markers = [];
 
-// the square areas created by the user
 let exclusionZones = [];
-let minTimestamp = globalMinTimestamp;
-let maxTimestamp = globalMaxTimestamp;
 
 /**
  * loads the map
@@ -84,26 +79,9 @@ function loadInstruction2Map() {
       await renderInstruction2Map();
     }
   });
-
-  $('#instruction2-map-daterange').ionRangeSlider({
-    skin: 'round',
-    type: 'double',
-    grid: true,
-    min: minTimestamp,
-    max: maxTimestamp,
-    from: minTimestamp,
-    to: maxTimestamp,
-    prettify: (ts) => moment(ts).format('MMM D, YYYY'),
-    onFinish: async function () {
-      // retrieve the millisecond range permitted
-      minTimestamp = $('#instruction2-map-daterange').data('from')
-      maxTimestamp = $('#instruction2-map-daterange').data('to')
-      await renderInstruction2Map();
-    },
-  });
 }
 
-function addInstruction2Marker(latlng, icon, html) {
+function addInstruction2Marker(latlng, html) {
   let marker = new L.Marker(latlng);
   instruction2Map.addLayer(marker);
   if (html != null) {
@@ -116,7 +94,6 @@ let rendering = false;
 
 function getValidPoints() {
   return instruction2Points
-    .filter((x) => x.timestamp >= minTimestamp && x.timestamp < maxTimestamp)
     .filter((loc) => {
       for (const box of exclusionZones) {
         if (box.contains([loc.latitude, loc.longitude])) {
@@ -185,27 +162,131 @@ async function renderInstruction2Map() {
   rendering = false;
 }
 
-/**
- * Instruction step 0
- */
-async function instruction0() {
-  $('#instruction1-selectfile').prop('disabled', true);
-  await instruction1();
-}
+let datePicked = false;
+let emailValid = false;
+let fileValid = false;
 
 /**
  * when the file handler loads a file, we process it
  */
 async function instruction1() {
+  // reset
+  datePicked = false;
+  emailValid = false;
+  fileValid = false;
+  $('#instruction1-confirm').prop('disabled', true);
+  $('#instruction1-email').val('');
+  $('#instruction1-daterange').val('');
+
+
+  function conditionallyEnableButton() {
+    if (datePicked == true && emailValid == true && fileValid == true) {
+      $('#instruction1-confirm').prop('disabled', false);
+    } else {
+      $('#instruction1-confirm').prop('disabled', true);
+    }
+  }
+
+  let mindate = null;
+  let maxdate = null;
+  let file = null;
+  let email = null;
+
+
+  $('#instruction1-daterange').daterangepicker({
+    autoUpdateInput: false,
+    minDate: moment('2020-01-01').toDate(),
+    maxDate: moment().toDate(),
+    opens: 'right',
+    locale: {
+      cancelLabel: 'Clear'
+    }
+  });
+
+  // Clear
+  $('#instruction1-daterange').on('apply.daterangepicker', function (ev, picker) {
+    $(this).val(moment(picker.startDate).format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+    datePicked = true;
+    mindate = picker.startDate.valueOf();
+    maxdate = picker.endDate.valueOf();
+    conditionallyEnableButton();
+  });
+
+  $('#instruction1-daterange').on('cancel.daterangepicker', function (ev, picker) {
+    $(this).val('');
+    datePicked = false;
+    conditionallyEnableButton();
+  });
+
+  $('#instruction1-email').change(function () {
+    const elem = $(this);
+    email = elem.val();
+    emailValid = elem[0].validity.valid;
+    if (emailValid) {
+      $('#instruction1-email-error').hide();
+    } else {
+      $('#instruction1-email-error').show();
+    }
+    conditionallyEnableButton();
+  });
+
   // when a file is uploaded
-  $('#customFile').change(async function () {
-    const f = this.files[0];
-    // enable the button and set a listener
-    $('#instruction1-selectfile').prop('disabled', false);
-    $('#instruction1-selectfile').button().click(async function () {
-      $('#instruction1-selectfile').prop('disabled', true);
-      await instruction2(f);
-    });
+  $('#instruction1-file').change(async function () {
+    // Set filename
+    const fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    file = this.files[0];
+
+    function validateObj(obj) {
+      if (!Array.isArray(obj.locations)) {
+        return false;
+      }
+      for (const loc of obj.locations) {
+        if (typeof loc.latitudeE7 != 'number') {
+          return false;
+        }
+        if (typeof loc.latitudeE7 != 'number') {
+          return false;
+        }
+        if (typeof loc.latitudeE7 != 'number') {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Attempt to parse file
+    try {
+      fileValid = validateObj(JSON.parse(await file.text()));
+    } catch (e) {
+      fileValid = false;
+    }
+
+    if (fileValid) {
+      $('#instruction1-file-error').hide();
+    } else {
+      $('#instruction1-file-error').show();
+    }
+
+    // enable button if necessary
+    conditionallyEnableButton();
+  });
+
+  // Submit button
+  $('#instruction1-confirm').button().click(async function () {
+    $('#instruction1-confirm').prop('disabled', true);
+
+    const points = JSON.parse(await file.text()).locations
+      .filter((loc) => loc.timestampMs >= minTimestamp && loc.timestampMs < maxTimestamp)
+      .map((loc) => ({
+        latitude: loc.latitudeE7 * 10e-8,
+        longitude: loc.longitudeE7 * 10e-8,
+        timestamp: parseInt(loc.timestampMs),
+      }));
+
+
+
+    await instruction2(points, email, mindate, maxdate);
   });
 }
 
@@ -213,21 +294,13 @@ async function instruction1() {
 /**
  * we initialize the methods for the user to begin excluding data
  */
-async function instruction2(file, email, infect_start) {
+async function instruction2(locs, email, infect_start) {
   loadInstruction2Map();
 
   $('#instruction1-div').hide();
   $('#instruction2-div').show();
 
   // corona didn't really get started till 2020
-  instruction2Points = JSON.parse(await file.text()).locations
-    .filter((loc) => loc.timestampMs >= minTimestamp && loc.timestampMs < maxTimestamp)
-    .map((loc) => ({
-      latitude: loc.latitudeE7 * 10e-8,
-      longitude: loc.longitudeE7 * 10e-8,
-      timestamp: parseInt(loc.timestampMs),
-    }));
-
   await renderInstruction2Map();
 
   $('#instruction2-confirm').prop('disabled', false);
@@ -254,14 +327,7 @@ async function instruction2(file, email, infect_start) {
   });
 }
 
-// Add the following code if you want the name of the file appear on select
-$(".custom-file-input").on("change", function () {
-  var fileName = $(this).val().split("\\").pop();
-  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-});
-
-
 $(document).ready(async function () {
   // begin the process
-  await instruction0();
+  await instruction1();
 });

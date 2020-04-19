@@ -110,36 +110,46 @@
               <!-- Email -->
               <div class="form-group">
                 <label for="instruction1-email">1. Email address</label>
-                <input type="email" class="form-control" id="instruction1-email"
-                  aria-describedby="instruction1-email-text">
-                <small id="instruction1-email-text" class="form-text text-muted">
+                <input type="email" class="form-control" id="instruction1-email"></input>
+                <small class="form-text text-muted">
                   Your email will never be shared. We ask for it in order to provide important security
                   updates about your data and its status.
                 </small>
+                <p id="instruction1-email-error" class="form-text text-danger" style="display:none;">
+                  This email is not valid.
+                </p>
               </div>
 
               <!-- Infection Dates -->
               <div class="form-group">
                 <label for="instruction1-daterange">2. Infection Date Range</label>
-                <input type="text" class="form-control" id="instruction1-daterange"
-                  aria-describedby="instruction1-email-text">
-                <small id="instruction1-email-text" class="form-text text-muted">
-                  Your email will never be shared. We ask for it in order to provide important security
-                  updates about your data and its status.
+                <input type="text" class="form-control" id="instruction1-daterange">
+                <small class="form-text text-muted">
+                  Select the date at which you first started showing symptoms to the date you last showed symptoms.
                 </small>
+                <p id="instruction1-daterange-error" class="form-text text-danger" style="display:none;">
+                  You must enter a date range.
+                </p>
               </div>
 
               <!-- Upload Data -->
               <div class="form-group">
                 <label for="instruction1-file-div">3. Select JSON Location Data</label>
                 <div class="custom-file" id="instruction1-file-div">
-                  <input type="file" class="custom-file-input" id="instruction1-file"
-                    aria-describedby="instruction1-email-text">
+                  <input type="file" class="custom-file-input" id="instruction1-file">
                   <label class="custom-file-label" for="instruction1-file">Choose file</label>
                 </div>
+                <small class="form-text text-muted">
+                  Select the date at which you first started showing symptoms to the date you last showed symptoms.
+                </small>
+                <p id="instruction1-file-error" class="form-text text-danger" style="display:none;">
+                  The selected file is not a valid Google Location History in JSON format.
+                </p>
               </div>
             </form>
-            <button class="btn my-1 btn-primary" id="instruction1-selectfile">Select</button>
+
+            <!-- Submit button -->
+            <button class="btn my-1 btn-primary" id="instruction1-confirm">Submit Info</button>
           </div>
         </div>
       </div>
