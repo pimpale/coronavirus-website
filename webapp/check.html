@@ -39,18 +39,22 @@
 
 </head>
 
-<body class="palette-level-one">
+<body>
   <header class="header">
     <nav class="bg-dark navbar navbar-expand-lg fixed-top py-3">
-      <div class="container"><a href="index.html" class="navbar-brand font-weight-bold">Coronavirus Check</a>
+      <div class="container">
+        <a href="index.html" class="navbar-brand font-weight-bold">Coronavirus Check</a>
         <button type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"
-          class="navbar-toggler navbar-toggler-right"><i class="fa fa-bars"></i></button>
+          class="navbar-toggler navbar-toggler-right text-light">
+          <i class="fa fa-bars"></i>
+        </button>
         <div id="navbarSupportedContent" class="collapse navbar-collapse">
           <div class="navbar-nav ml-auto">
-            <a href="about.html" class="nav-item nav-link font-weight-bold">About</a>
-            <a href="faq.html" class="nav-item nav-link font-weight-bold">FAQ</a>
             <a href="check.html" class="nav-item nav-link font-weight-bold">Check Exposure</a>
+            <a href="upload.html" class="nav-item nav-link font-weight-bold">Upload Data</a>
+            <a href="faq.html" class="nav-item nav-link font-weight-bold">FAQ</a>
+            <a href="about.html" class="nav-item nav-link font-weight-bold">About</a>
           </div>
         </div>
       </div>
@@ -73,14 +77,6 @@
             ornare nulla ornare. Pellentesque risus augue, egestas eu placerat quis, euismod nec ipsum. Donec et
             malesuada magna, consequat condimentum sem. Fusce in consectetur dui. Maecenas ornare quis turpis sed
             finibus.
-
-            Mauris scelerisque neque pretium, ornare erat ac, lacinia nisi. Donec pharetra, ipsum semper tempor
-            placerat, ante ex sagittis justo, at interdum justo dolor nec mi. Etiam nunc mi, elementum faucibus mi at,
-            ultricies convallis nisi. Mauris nec sollicitudin risus. Morbi ornare, lorem a porta pulvinar, turpis metus
-            ultricies ipsum, vel venenatis urna ligula ullamcorper leo. Nullam condimentum commodo risus. In euismod
-            tortor arcu, eu mattis felis fermentum in. Fusce tristique est id risus pharetra efficitur. Proin pharetra,
-            purus vel porttitor varius, justo orci vulputate velit, at vestibulum arcu mauris non turpis. Integer
-            sollicitudin faucibus mi, posuere mollis magna. Aliquam ac magna nisi.
           </p>
         </div>
       </div>
@@ -93,7 +89,7 @@
   <div id="not-sidebar" class="container-fluid">
     <div class="px-3 my-5 py-5">
       <div id="alert-zone"></div>
-        <!-- Instruction 1 -->
+      <!-- Instruction 1 -->
       <div class="card-deck" id="instruction1-div">
         <div class="card col-sm-10">
           <div class="card-body">
@@ -125,7 +121,7 @@
           </div>
         </div>
       </div>
-        <!-- Instruction 2 -->
+      <!-- Instruction 2 -->
       <div class="card-deck" id="instruction2-div" style="display:none;">
         <div class="card col-sm-10">
           <div class="card-body">
@@ -135,7 +131,8 @@
             <p class="card-text">
               Use the slider below to select the date ranges
               you want to check. Use the rectangle tool to block areas from the upload.
-              Please ensure you block sensitive information that you would not want others to know. (Home, workplace, etc.)
+              Please ensure you block sensitive information that you would not want others to know. (Home, workplace,
+              etc.)
               This data is not saved on our servers.
               Note that your data must be under 10MB for upload.
             </p>
@@ -162,8 +159,8 @@
             </div>
             <p class="card-text">
               View potential exposures to coronavirus.
-              Note: if you feel you may have coronavirus yourself, please consider anonymously uploading your location data.
-              <a href="upload.html">
+              Note: if you feel you may have coronavirus yourself, please consider
+              <a href="upload.html">anonymously uploading your location data</a>.
             </p>
             <div id="instruction3-map" class="my-3" style="height:50vh;"></div>
             <div class="progress" id="instruction3-progress-div" style="height: 30px;display:none;">

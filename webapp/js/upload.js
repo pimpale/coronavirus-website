@@ -267,11 +267,11 @@ async function instruction1() {
     $('#instruction1-confirm').prop('disabled', true);
 
     // 14 days before symptoms
-    const day = 24*60*60*1000
-    const infect_start = mindate - 14*day;
+    const day = 24 * 60 * 60 * 1000
+    const infect_start = mindate - 14 * day;
 
     // Whichever comes last: 10 days after the start date or 3 days after the end of symptoms
-    const infect_end = Math.max(mindate + 10*day, maxdate + 3*day);
+    const infect_end = Math.max(mindate + 10 * day, maxdate + 3 * day);
 
     instruction2Points = JSON.parse(await file.text()).locations
       .filter((loc) => loc.timestampMs >= infect_start && loc.timestampMs < infect_end)
