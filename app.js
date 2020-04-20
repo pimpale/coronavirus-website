@@ -3,6 +3,7 @@
 'use strict';
 // Imports
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const sqlite3 = require('better-sqlite3');
 const bodyParser = require('body-parser');
 const compression = require('compression');
@@ -118,6 +119,14 @@ async function initialize() {
   // configure to use body parser
   app.use(bodyParser.json({limit: '10mb'}));
   app.use(bodyParser.urlencoded({limit: '10mb', extended: true}));
+
+  const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100
+  });
+
+  // only apply to requests that begin with /api/
+  app.use("/api/", apiLimiter);
 
   app.use(compression());
   // Add methods
