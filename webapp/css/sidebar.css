@@ -6,7 +6,6 @@
   overflow-x: hidden;
   overflow-y: hidden;
   width: 250px;
-  z-index: 1;
   margin: 0%;
 }
 
@@ -31,5 +30,5 @@
 }
 
 #not-sidebar {
-  padding-left:250px
+   padding-left:250px;
 }
