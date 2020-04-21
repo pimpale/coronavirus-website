@@ -42,11 +42,6 @@
 </head>
   <header class="header">
     <nav class="bg-dark navbar navbar-expand-lg fixed-top py-3">
-      <div class="navbar-nav mr-auto">
-        <button id="sidebar-toggle" type="button" class="btn btn-dark">
-          <i class="fa fa-bars fa-2x"></i>
-        </button>
-      </div>
       <div class="container">
         <a href="index.html" class="navbar-brand font-weight-bold">Coronavirus Check</a>
         <button type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -59,45 +54,21 @@
             <a href="upload.html" class="nav-item nav-link font-weight-bold">Upload Data</a>
             <a href="faq.html" class="nav-item nav-link font-weight-bold">FAQ</a>
             <a href="about.html" class="nav-item nav-link font-weight-bold">About</a>
-            <a href="instructions.html" class="nav-item nav-link font-weight-bold">How to Use</a>
           </div>
         </div>
       </div>
     </nav>
   </header>
 
-  <!-- Sidebar -->
-  <nav id="sidebar" class="text-light bg-dark sidebar-fixed">
-    <div class="mx-3 my-5 py-5">
-      <!-- Instructions -->
-      <h3 class="text-light">Instructions</h3>
-      <!-- Upload -->
-      <div class="card bg-dark my-3">
-        <div class="card-body">
-          <h6 class="card-title text-light">About this app</h6>
-          <p class="card-text">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce ornare tellus mauris, non pellentesque magna
-            lacinia ac. Ut semper rhoncus ligula eget sodales. Sed lectus risus, vehicula a porta nec, sollicitudin eu
-            leo. Proin viverra nisl vel quam feugiat aliquet. Pellentesque rutrum ligula ac urna sollicitudin, sed
-            ornare nulla ornare. Pellentesque risus augue, egestas eu placerat quis, euismod nec ipsum. Donec et
-            malesuada magna, consequat condimentum sem. Fusce in consectetur dui. Maecenas ornare quis turpis sed
-            finibus.
-          </p>
-        </div>
-      </div>
-    </div>
-  </nav>
-
-
   <!-- Content -->
 
   <!-- Center Screen -->
-  <div id="content-wrapper" class="container-fluid not-sidebar">
+  <div class="container-fluid">
     <div class="px-3 my-5 py-5">
       <div id="alert-zone"></div>
       <!-- Instruction 1 -->
       <div class="card-deck" id="instruction1-div">
-        <div class="card col-sm-10">
+        <div class="card col-sm-8">
           <div class="card-body">
             <div class="input-group">
               <h5 class="card-title text-center">Basic Info</h5>
@@ -159,7 +130,7 @@
 
       <!-- Instruction 2 -->
       <div class="card-deck" id="instruction2-div" style="display:none;">
-        <div class="card col-sm-10">
+        <div class="card col-sm-8">
           <div class="card-body">
             <div class="input-group">
               <h5 class="card-title text-center">2. Select Locations</h5>
