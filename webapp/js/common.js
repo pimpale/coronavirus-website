@@ -111,6 +111,10 @@ function giveTempSuccess(innerHTML) {
   giveAlert(innerHTML, 'alert-success', false);
 }
 
+function givePermSuccess(innerHTML) {
+  giveAlert(innerHTML, 'alert-success', true);
+}
+
 function giveTempInfo(innerHTML) {
   giveAlert(innerHTML, 'alert-info', false);
 }
@@ -123,21 +127,11 @@ function linkRelative(text, url) {
   return linkAbsolute(text, staticUrl() + url);
 }
 
-// Returns a promise for the json given the response
-function parseResponse(response) {
-  if (!response.ok) {
-    console.log(response);
-    throw Error(response.statusText);
-  }
-  return response.json();
-}
-
 // Fetches json given a URL
 async function fetchJson(url, params={}) {
   let response = await fetch(url, params);
   if (!response.ok) {
-    console.log(response);
-    throw Error(response.statusText);
+    throw Error(await response.text());
   }
   return response.json();
 }

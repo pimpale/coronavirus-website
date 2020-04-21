@@ -1,4 +1,4 @@
-/* global moment sleep L apiUrl fetchJson blueIcon violetIcon*/
+/* global moment sleep L apiUrl fetchJson givePermSuccess givePermError */
 
 // the map
 let instruction2Map = null;
@@ -285,7 +285,6 @@ async function instruction1() {
   });
 }
 
-
 /**
  * we initialize the methods for the user to begin excluding data
  */
@@ -314,11 +313,28 @@ async function instruction2(email, infect_start) {
           locs: getValidPoints(),
         })
       });
-      $('#instruction2-wait').hide();
-      $('#instruction2-success').show();
+      givePermSuccess('Upload Successful');
     } catch (e) {
-      // TODO pls handle error
+      console.log(e);
+      let errObj = JSON.parse(e.message);
+      let errStr = 'Upload Failed: ';
+      switch(errObj.code) {
+        case 409: {
+          errStr += 'This IP has already uploaded data';
+          break;
+        }
+        case 422: {
+          errStr += 'Malformed Request (Usually due to email)';
+          break;
+        }
+        default: {
+          errStr += 'Unknown Error (Try again later)';
+          break;
+        }
+      }
+      givePermError(errStr);
     }
+    $('#instruction2-wait').hide();
   });
 }
 

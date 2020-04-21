@@ -35,14 +35,21 @@ function locToBox(loc) {
 function uploadLocations(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({errors: errors.array()});
+    res.status(422).json({
+      code: 422,
+      result: null,
+      errors: errors.array()});
     return;
   }
 
   // Make sure this isn't a duplicate entry
   const already = db.prepare('SELECT email FROM uploads WHERE email = ?').all(req.body.email);
   if(already.length > 0) {
-    res.status(409).json({errors: ['This resource already exists']});
+    res.status(409).json({
+      code: 409,
+      result: null,
+      errors: [{msg: 'This resource already exists'}]
+    });
     return;
   }
 
@@ -63,7 +70,11 @@ function uploadLocations(req, res) {
 
   upload(req.body.locs, req.ip, req.body.email, req.body.infect_start);
 
-  res.end();
+  res.status(200).json({
+    code: 200,
+    result: null,
+    errors: [],
+  });
 }
 
 /**
@@ -77,7 +88,10 @@ function uploadLocations(req, res) {
 function checkLocations(req, res) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({errors: errors.array()});
+    res.status(422).json({
+      code: 422,
+      result: null,
+      errors: errors.array()});
     return;
   }
 
@@ -103,8 +117,11 @@ function checkLocations(req, res) {
     }
   }
 
-  res.send(intersections);
-  res.end();
+  res.status(200).json({
+    code: 200,
+    result: intersections,
+    errors: [],
+  });
 }
 
 /**
