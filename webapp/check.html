@@ -13,8 +13,8 @@
 
 
   <!-- CSS References -->
-  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="vendor/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
   <link rel="stylesheet" href="vendor/ion-rangeslider/css/ion.rangeSlider.min.css">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
   <link rel="stylesheet" href="vendor/leaflet-draw/leaflet.draw.css">
@@ -32,6 +32,7 @@
   <script src="vendor/leaflet-draw/leaflet.draw.js"></script>
   <script src="vendor/leaflet-color-markers/js/leaflet-color-markers.js"></script>
   <script src="js/common.js"></script>
+  <script src="js/sidebar.js"></script>
   <script src="js/check.js"></script>
 
   <!-- Favicon -->
@@ -43,9 +44,8 @@
   <header class="header">
     <nav class="bg-dark navbar navbar-expand-lg fixed-top py-3">
       <div class="navbar-nav mr-auto">
-        <button type="button" class="btn btn-large bg-dark text-light">
-          test
-          <i class="fa fa-bars"></i>
+        <button id="sidebar-toggle" type="button" class="btn btn-dark">
+          <i class="fa fa-bars fa-2x"></i>
         </button>
       </div>
       <div class="container">
@@ -91,7 +91,7 @@
   <!-- Content -->
 
   <!-- Center Screen -->
-  <div id="not-sidebar" class="container-fluid">
+  <div id="content-wrapper" class="container-fluid not-sidebar">
     <div class="px-3 my-5 py-5">
       <div id="alert-zone"></div>
       <!-- Instruction 1 -->

@@ -29,6 +29,16 @@
   display:block;
 }
 
-#not-sidebar {
+.not-sidebar {
    padding-left:250px;
+}
+
+#sidebar-toggle:hover,
+#sidebar-toggle:focus,
+#sidebar-toggle:active,
+#sidebar-toggle.active,
+#sidebar-toggle.disabled,
+#sidebar-toggle[disabled] {
+  color: #ffffff;
+  background: #343a40;
 }
