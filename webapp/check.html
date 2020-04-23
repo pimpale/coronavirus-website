@@ -81,20 +81,22 @@
               data. From this file, upload <code>Location History.json</code>. Then, click select.
             </p>
             <form>
-              <div class="custom-file">
-                <input type="file" class="custom-file-input" id="customFile">
-                <label class="custom-file-label" for="customFile">Choose file</label>
+              <!-- Upload Data -->
+              <div class="form-group">
+                <label for="instruction1-file-div">Select JSON Location Data</label>
+                <div class="custom-file" id="instruction1-file-div">
+                  <input type="file" class="custom-file-input" id="instruction1-file">
+                  <label class="custom-file-label" for="instruction1-file">Choose file</label>
+                </div>
+                <small class="form-text text-muted">
+                  Select the date at which you first started showing symptoms to the date you last showed symptoms.
+                </small>
+                <p id="instruction1-file-error" class="form-text text-danger" style="display:none;">
+                  The selected file is not a valid Google Location History in JSON format.
+                </p>
               </div>
             </form>
-
-            <script>
-              // Add the following code if you want the name of the file appear on select
-              $(".custom-file-input").on("change", function () {
-                var fileName = $(this).val().split("\\").pop();
-                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-              });
-            </script>
-            <button class="btn my-1 btn-primary" id="instruction1-selectfile">Select</button>
+            <button class="btn my-1 btn-primary" id="instruction1-confirm">Select</button>
           </div>
         </div>
       </div>

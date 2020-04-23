@@ -1,4 +1,4 @@
-/* global moment sleep L apiUrl fetchJson blueIcon violetIcon*/
+/* global moment sleep L apiUrl fetchJson givePermSuccess givePermError violetIcon */
 
 const globalMinTimestamp = moment('2020-01-01').valueOf();
 const globalMaxTimestamp = moment().valueOf();
@@ -198,14 +198,51 @@ async function instruction0() {
  */
 async function instruction1() {
   // when a file is uploaded
-  $('#customFile').change(async function () {
+  $('#instruction1-file').change(async function () {
+
+    // set filename
+    const fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
     const f = this.files[0];
-    // enable the button and set a listener
-    $('#instruction1-selectfile').prop('disabled', false);
-    $('#instruction1-selectfile').button().click(async function () {
-      $('#instruction1-selectfile').prop('disabled', true);
-      await instruction2(f);
-    });
+
+   function validateObj(obj) {
+      if (!Array.isArray(obj.locations)) {
+        return false;
+      }
+      for (const loc of obj.locations) {
+        if (typeof loc.latitudeE7 != 'number') {
+          return false;
+        }
+        if (typeof loc.latitudeE7 != 'number') {
+          return false;
+        }
+        if (typeof loc.latitudeE7 != 'number') {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // Attempt to parse file
+    let fileValid = false;
+    try {
+      fileValid = validateObj(JSON.parse(await f.text()));
+    } catch (e) {
+      fileValid = false;
+    }
+
+    if (fileValid) {
+      $('#instruction1-file-error').hide();
+      // enable the button and set a listener
+      $('#instruction1-confirm').prop('disabled', false);
+      $('#instruction1-confirm').button().click(async function () {
+        $('#instruction1-confirm').prop('disabled', true);
+        await instruction2(f);
+      });
+    } else {
+      $('#instruction1-file-error').show();
+      $('#instruction1-confirm').prop('disabled', true);
+    }
   });
 }
 
@@ -233,16 +270,20 @@ async function instruction2(file) {
   $('#instruction2-confirm').prop('disabled', false);
   $('#instruction2-confirm').button().click(async function () {
     $('#instruction2-wait').show();
-    const ret = await fetchJson(`${apiUrl()}/checklocations/`, {
-      method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({locs: getValidPoints()})
-    });
+    try {
+      const ret = await fetchJson(`${apiUrl()}/checklocations/`, {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({locs: getValidPoints()})
+      });
+      await instruction3(ret.result);
+    } catch(e) {
+      givePermError('Failed to check data (Try again later)');
+    }
     $('#instruction2-wait').hide();
-    await instruction3(ret);
   });
 }
 
@@ -313,6 +354,10 @@ function loadInstruction3Map(intersections) {
  */
 async function instruction3(checkedLocations) {
   loadInstruction3Map(checkedLocations);
+
+  if(checkedLocations.length == 0) {
+    givePermSuccess('No instances of Coronavirus exposure found');
+  }
 
   $('#instruction2-div').hide();
   $('#instruction3-div').show();
