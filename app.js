@@ -1,7 +1,7 @@
 /* globals require */
 
 'use strict';
-// Imports
+
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const sqlite3 = require('better-sqlite3');
