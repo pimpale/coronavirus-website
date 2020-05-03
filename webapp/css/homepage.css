@@ -30,10 +30,10 @@ h2 {
 .hero {
     align-items: center;
     background-attachment: fixed;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6),rgba(0, 0, 0, 0.3)), url("../img/homepage-bg.png");
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.75),rgba(0, 0, 0, 0.3)), url("../img/homepage-bg.webp");
     color: #fff;
     display: flex;
     height: 100vh;
