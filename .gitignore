@@ -2,4 +2,3 @@ node_modules/
 database.sqlite3
 .idea/
 ./frontend/node_modules/
-./frontend/dist/
