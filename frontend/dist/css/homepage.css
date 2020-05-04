@@ -7,10 +7,17 @@
   background: #ffc127ff;
 }
 
+html, body{
+  height: 100%;
+}
+
 body {
   font-family: 'Ubuntu', sans-serif;
   max-width: 100%;
   overflow-x: hidden;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .row {
@@ -292,8 +299,13 @@ footer .footerlogo h6 a:hover {
   color:#ddd;
 }
 
+.content {
+  flex: 1 0 auto;
+}
+
 .footer {
   background:#3a3a3a;
+  flex-shrink:0;
 }
 
 .center {

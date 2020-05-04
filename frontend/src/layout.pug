@@ -43,13 +43,14 @@ html
                 a.nav-item.nav-link.font-weight-bold(href='about.html') About
 
     // This is where the good stuff goes
-    block content
+    .content
+      block content
 
     footer.footer
-      .container
-        .footerlogo
-          p(style='padding-top: 10px;')
+      .container-fluid.py-1
+          br
+          p
             a.text-light(href='about.html') About and FAQs
           p
             a.text-light(href='termsofservice.html') Terms of Service
-          p.text-light(style='margin-bottom:-50px') &copy; Govind Pimpale
+          p.text-light &copy; Govind Pimpale
