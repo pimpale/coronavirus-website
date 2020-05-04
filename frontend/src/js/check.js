@@ -1,6 +1,6 @@
 /* global moment sleep L apiUrl fetchJson givePermSuccess givePermError violetIcon */
 
-const globalMinTimestamp = moment('2020-01-01').valueOf();
+const globalMinTimestamp = moment('2017-01-01').valueOf();
 const globalMaxTimestamp = moment().valueOf();
 
 // the map
