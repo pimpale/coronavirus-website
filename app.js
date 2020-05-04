@@ -162,7 +162,7 @@ async function initialize() {
   ], checkLocations);
 
   // serve static files
-  app.use(express.static('webapp'));
+  app.use(express.static('frontend/dist'));
 }
 
 /**
