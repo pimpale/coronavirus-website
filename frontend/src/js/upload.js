@@ -294,6 +294,8 @@ async function instruction2(email, infect_start) {
   $('#instruction1-div').hide();
   $('#instruction2-div').show();
 
+  instruction2Map.invalidateSize(true);
+
   // corona didn't really get started till 2020
   await renderInstruction2Map();
 

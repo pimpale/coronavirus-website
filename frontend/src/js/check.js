@@ -256,6 +256,8 @@ async function instruction2(file) {
   $('#instruction1-div').hide();
   $('#instruction2-div').show();
 
+  instruction2Map.invalidateSize(true);
+
   // corona didn't really get started till 2020
   instruction2Points = JSON.parse(await file.text()).locations
     .filter((loc) => loc.timestampMs >= minTimestamp && loc.timestampMs < maxTimestamp)
@@ -358,9 +360,9 @@ async function instruction3(checkedLocations) {
   if(checkedLocations.length == 0) {
     givePermSuccess('No instances of Coronavirus exposure found');
   }
-
   $('#instruction2-div').hide();
   $('#instruction3-div').show();
+  instruction3Map.invalidateSize(true);
 }
 
 $(document).ready(async function () {
