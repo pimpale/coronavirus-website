@@ -1,23 +1,43 @@
-# messaging
+# Innexo.io: Contact Tracer
+## About
 
-Instant messaging online with this extremely simple messaging service.
+Innexo.io serves as a platform for the public that would allow individuals affected by the virus
+to upload their location data and members of the community to compare their own location to verify whether
+they have potentially been exposed to the virus. The user who has been positively tested with COVID-19 uploads
+their data, inputting the range in which they were sick and had symptoms. The web application would then display
+this location data on a map; in order to protect the privacy of the user, the application allows them to erase
+areas they want to hide, such as their home address. Once the user is satisfied with their privacy, they enter
+the upload button. Their data then gets put into a SQLite3 database. Anonymous users can then acquire their own
+location history from google and load it into the website. The application will then check if they were in a
+nearby radius of someone who has COVID-19. After their location history is compared, any intersection between
+the interested member and a user infected with the virus will be shown with a marker dot, indicating how far
+the affected member was in the infection cycle. In order to maintain user privacy, individual metrics will not
+be shown. If the interested member learns that they have been exposed to the virus, they have an option to
+upload their data as well and can view other pages of the website which inform what next steps to take, whether
+it be self-isolation or testing.
 
-![Screenshot](./res/messaging.png?raw=true)
 
-Note that there is absolutely no web security, so JS/HTML injection is very possible. On the bright side, you can use this to embed audio, Youtube videos, and much more.
+## Installation & Running
 
-### How To Install/Run
-This is a very simple node project, and can be run as you'd expect.
-
+There are two major components of this app: the frontend and the backend. It is necessary to initialize both
+projects in order to run the app. For frontend, you must run:
 ```
-$ git clone https://github.com/pimpale/messaging
-$ cd ./messaging
-$ npm install
-$ node app.js
+# install scripts
+cd frontend
+
+npm i
+npm i --only=dev
+
+npm run prod
 ```
-By default, the app will open on port 8080, but you can change this by editing app.js.
 
+Then, to instantiate the backend, you should do:
+```
+cd ..
+npm i
+npm i --only=dev
 
-### How To Use
-Change your display name by editing the text in the upper left hand box.  Write your message in the text area in the upper right hand box, and once ready, click the submit button. More recent messages should appear at the top, and older messages at the bottom. 
+node app.js
+```
 
+The application should now be running on port 8080 of your machine.
