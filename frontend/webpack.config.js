@@ -14,17 +14,19 @@ const config = {
     rules: [
       {
         test: /\.pug$/,
-        use: ['html-loader?attributes=false', 'pug-html-loader']
+        use: [{ loader: "pug-loader" }],
       },
     ]
   },
   plugins: [
-    new CopyWebpackPlugin([
-      {from: 'src/vendor', to: 'vendor'},
-      {from: 'src/img', to: 'img'},
-      {from: 'src/css', to: 'css'},
-      {from: 'src/js', to: 'js'},
-    ]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'src/vendor', to: 'vendor' },
+        { from: 'src/img', to: 'img' },
+        { from: 'src/css', to: 'css' },
+        { from: 'src/js', to: 'js' },
+      ]
+    }),
     [
       'about',
       'index',
@@ -38,4 +40,5 @@ const config = {
     }))
   ].flat()
 };
+
 module.exports = config;
